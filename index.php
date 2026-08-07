@@ -1143,15 +1143,19 @@
         </div>
 
         <!-- Footer -->
+        <div id="updateActionContainer" class="update-action-container">
 
-        <button
-            class="continue-btn"
-            onclick="closeUpdateModal()">
+    <button
+       style="margin-top:30px;"
+        id="updateNowBtn"
+        class="close-update"
+        onclick="startUpdate()">
 
-            Continue to Nemo
+        <i class="fa-brands fa-space-awesome" style="padding-right:5px;font-size:20px;"></i> Launch Update
 
-        </button>
+    </button>
 
+</div>
     </div>
 
 </div>

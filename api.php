@@ -1,5 +1,11 @@
 <?php
 
+require_once __DIR__ . "/vendor/autoload.php";
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+
+$dotenv->load();
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -176,7 +182,7 @@ if ($action === 'start_nemo') {
 
     try {
 
-        $batFile = "C:\\wamp64\\www\\Neemo_image_beta\\Engine\\start_nemo.bat";
+        $batFile = $_ENV["NEMO_BAT_FILE"];
 
         $process = popen(
             'cmd /c start "" "' . $batFile . '"',
@@ -278,6 +284,32 @@ if ($action === "upload_html_css") {
         "http://127.0.0.1:3001/upload_html_css"
 
     );
+
+    exit;
+
+}
+
+if($action === "update_nemo"){
+
+    $response = file_get_contents(
+
+        "http://127.0.0.1:3001/update-client",
+
+        false,
+
+        stream_context_create([
+
+            "http"=>[
+
+                "method"=>"POST"
+
+            ]
+
+        ])
+
+    );
+
+    echo $response;
 
     exit;
 

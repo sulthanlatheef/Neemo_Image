@@ -5,7 +5,7 @@ Nemo Client Version
 ===========================================
 */
 
-const NEMO_VERSION = "1.0.1 Beta";
+const NEMO_VERSION = "1.0.2 Beta";
 
 /*
 ===========================================
@@ -1411,8 +1411,10 @@ async function checkNemoStatus(){
             startNemoBtn.style.cursor =
                 "not-allowed";
 
-            startNemoText.textContent =
-                "Neemo Running";
+             startNemoBtn.innerHTML = `
+                <i class="fas fa-play"></i>
+                Neemo Running
+            `;
 
         }else{
 
@@ -2493,14 +2495,9 @@ startNemoBtn.addEventListener(
 
                 checkNemoStatus();
 
-                // Restore button
-                 startNemoBtn.innerHTML = `
-                <i class="fas fa-play"></i>
-                Neemo Running
-            `;
-                startNemoBtn.disabled = false;
 
-            }, 3000);
+
+            }, 5000);
 
 
         }catch(error){
@@ -3290,6 +3287,278 @@ function closeUpdateModal(){
     ).style.display="none";
 
 }
+function updateProgress(percent, message) {
+
+    const fill =
+        document.getElementById("progressFill");
+
+    const status =
+        document.getElementById("progressStatus");
+
+    fill.style.width = percent + "%";
+
+    status.style.opacity = "0";
+
+    setTimeout(() => {
+
+        status.textContent = message;
+
+        status.style.opacity = "1";
+
+    }, 150);
+
+}
+function updateSuccess() {
+
+    document
+        .getElementById("progressCard")
+        .classList
+        .add("progress-success");
+
+    document
+        .getElementById("progressTitle")
+        .innerHTML =
+        " Update Completed Successfully";
+
+    updateProgress(
+        100,
+        "Neemo has been updated successfully."
+    );
+
+    setTimeout(
+        startCountdown,
+        1000
+    );
+
+}
+function startCountdown(){
+
+    let count=3;
+
+    document
+        .getElementById("progressTitle")
+        .innerHTML=
+
+        "Refreshing Neemo";
+
+    const status=
+
+        document.getElementById(
+            "progressStatus"
+        );
+
+    status.textContent=
+
+        `Refreshing in ${count}...`;
+
+    const timer=
+
+        setInterval(()=>{
+
+            count--;
+
+            if(count>0){
+
+                status.textContent=
+
+                    `Refreshing in ${count}...`;
+
+            }
+
+            else{
+
+                clearInterval(timer);
+
+                window.location.reload();
+
+            }
+
+        },1000);
+
+}
+function updateError(message){
+
+    console.error(
+        "Neemo Update Error:",
+        message
+    );
+
+    document
+        .getElementById("progressCard")
+        .classList
+        .add("progress-error");
+
+    const title = document.getElementById("progressTitle");
+
+title.innerHTML =
+    '<i class="fa-solid fa-circle-exclamation blinking-icon"></i> Update Could Not Be Completed';
+
+title.style.color = "#ef4444";
+
+title.style.fontWeight = "600";
+
+   const status = document.getElementById("progressStatus");
+
+status.style.color = "#ef4444";
+
+status.textContent = message;
+status.style.fontWeight = "600";
+    
+}
+function simulateCompletion(){
+
+    updateProgress(
+
+        45,
+
+        "Fetching latest changes..."
+
+    );
+
+    setTimeout(()=>{
+
+        updateProgress(
+
+            65,
+
+            "Pulling latest version..."
+
+        );
+
+    },600);
+
+    setTimeout(()=>{
+
+        updateProgress(
+
+            82,
+
+            "Applying updates..."
+
+        );
+
+    },1200);
+
+    setTimeout(()=>{
+
+        updateProgress(
+
+            95,
+
+            "Restarting Neemo Engine..."
+
+        );
+
+    },1800);
+
+    setTimeout(()=>{
+
+        updateSuccess();
+
+    },2500);
+
+}
+async function startUpdate() {
+
+    showProgressCard();
+
+    updateProgress(
+        15,
+        "Connecting to Neemo Engine..."
+    );
+
+    try {
+
+        const response = await fetch(
+
+            "api.php?action=update_nemo",
+
+            {
+                method: "POST"
+            }
+
+        );
+
+     
+
+        const result = await response.json();
+
+        if(result.status !== "success"){
+
+            updateError(
+                result.message
+            );
+
+            return;
+
+        }
+
+        /*
+        Nemo updated successfully.
+        Now show a beautiful
+        completion animation.
+        */
+
+        simulateCompletion();
+
+    }
+
+    catch(error){
+
+        updateError(
+            "Unable to connect with Neemo Engine."
+        );
+
+    }
+
+}
+
+
+function showProgressCard(){
+
+    document
+        .getElementById("updateActionContainer")
+        .innerHTML=`
+
+        <div
+            id="progressCard"
+            class="update-progress-card">
+
+            <div
+                id="progressTitle"
+                class="update-progress-title">
+
+              <i class="fa-solid fa-arrows-rotate"></i>  Updating Neemo
+
+            </div>
+
+            <div class="progress-bar">
+
+                <div
+                    id="progressFill"
+                    class="progress-fill">
+
+                </div>
+
+            </div>
+
+            <div
+                id="progressStatus"
+                style="margin-top:25px;"
+                class="update-progress-status">
+                
+
+                Preparing update...
+
+            </div>
+
+        </div>
+
+        `;
+
+}
+
+
 
 
 async function checkForUpdates(){

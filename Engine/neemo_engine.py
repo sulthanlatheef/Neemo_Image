@@ -18,7 +18,7 @@ sys.path.append(
         os.path.join(os.path.dirname(__file__), "..")
     )
 )
-from Config.config import DOCKER_PROJECT_PATH
+from Config.config import DOCKER_PROJECT_PATH,NEMO_PROJECT_PATH
 
 
 
@@ -503,7 +503,99 @@ def upload_html_css_endpoint():
 
         }), 500
 
+@app.route("/update-client", methods=["POST"])
+def update_client():
 
+    if not os.path.exists(NEMO_PROJECT_PATH):
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": "Nemo project path not found."
+
+        }), 404
+
+    try:
+
+        # -------------------------
+        # Fetch Latest Changes
+        # -------------------------
+
+        fetch_result = subprocess.run(
+
+            [
+                "git",
+                "-c",
+                f"safe.directory={NEMO_PROJECT_PATH}",
+                "fetch",
+                "origin"
+            ],
+
+            cwd=NEMO_PROJECT_PATH,
+
+            capture_output=True,
+
+            text=True,
+
+            check=True
+
+        )
+
+        # -------------------------
+        # Pull Latest Changes
+        # -------------------------
+
+        pull_result = subprocess.run(
+
+            [
+                "git",
+                "-c",
+                f"safe.directory={NEMO_PROJECT_PATH}",
+                "pull",
+                "origin",
+                "main"
+            ],
+
+            cwd=NEMO_PROJECT_PATH,
+
+            capture_output=True,
+
+            text=True,
+
+            check=True
+
+        )
+
+        return jsonify({
+
+            "status": "success",
+
+            "message": "Nemo updated successfully.",
+
+            "fetch_stdout": fetch_result.stdout,
+
+            "fetch_stderr": fetch_result.stderr,
+
+            "pull_stdout": pull_result.stdout,
+
+            "pull_stderr": pull_result.stderr
+
+        })
+
+    except subprocess.CalledProcessError as e:
+
+        return jsonify({
+
+            "status": "error",
+
+            "message": "Git update failed.",
+
+            "stdout": e.stdout,
+
+            "stderr": e.stderr
+
+        }), 500
 # ------------------------------------------------------------------
 # MAIN
 # ------------------------------------------------------------------
