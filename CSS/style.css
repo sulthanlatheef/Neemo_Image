@@ -7445,12 +7445,45 @@ IMAGE DROP CARD
     color:#38bdf8;
     padding-right:6px;
     font-size:17px;
-
+   
     
 
 }
 
 @keyframes softBlink{
+
+    0%{
+
+        opacity:1;
+
+    }
+
+    50%{
+
+        opacity:.35;
+
+    }
+
+    100%{
+
+        opacity:1;
+
+    }
+
+}
+
+.connecting-status{
+
+    color:#38bdf8;
+
+    animation:connectingBlink 1.2s ease-in-out infinite;
+
+    font-weight:700;
+
+}
+
+
+@keyframes connectingBlink{
 
     0%{
 

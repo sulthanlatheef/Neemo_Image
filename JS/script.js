@@ -5,7 +5,7 @@ Nemo Client Version
 ===========================================
 */
 
-const NEMO_VERSION = "1.0.2 Beta";
+const NEMO_VERSION = "1.0.1 Beta";
 
 /*
 ===========================================
@@ -3305,6 +3305,21 @@ function updateProgress(percent, message) {
 
         status.style.opacity = "1";
 
+        if(message === "Connecting to Neemo Engine..."){
+
+            status.classList.add(
+                "connecting-status"
+            );
+
+        }
+        else{
+
+            status.classList.remove(
+                "connecting-status"
+            );
+
+        }
+
     }, 150);
 
 }
@@ -3349,7 +3364,7 @@ function startCountdown(){
 
     status.textContent=
 
-        `Refreshing in ${count}...`;
+        `Refreshing in ${count}`;
 
     const timer=
 
@@ -3361,7 +3376,7 @@ function startCountdown(){
 
                 status.textContent=
 
-                    `Refreshing in ${count}...`;
+                    `Refreshing in ${count}`;
 
             }
 
@@ -3425,7 +3440,7 @@ function simulateCompletion(){
 
         );
 
-    },600);
+    },900);
 
     setTimeout(()=>{
 
@@ -3437,7 +3452,7 @@ function simulateCompletion(){
 
         );
 
-    },1200);
+    },1500);
 
     setTimeout(()=>{
 
@@ -3449,13 +3464,13 @@ function simulateCompletion(){
 
         );
 
-    },1800);
+    },2100);
 
     setTimeout(()=>{
 
         updateSuccess();
 
-    },2500);
+    },2800);
 
 }
 async function startUpdate() {
