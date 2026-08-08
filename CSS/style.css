@@ -7453,7 +7453,7 @@ IMAGE DROP CARD
     /* Upload Cards */
     .upload-card{
         gap:16px;
-        padding:22px;
+        padding:26px;
         margin-top:16px;
         border-radius:16px;
     }
