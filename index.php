@@ -18,7 +18,10 @@
     >
 
     <title>Neemo_Image — The Image To Form Converter</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link
+    rel="stylesheet"
+    href="css/style.css?v=<?php echo filemtime('css/style.css'); ?>"
+>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/geist-font@latest/style.css">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet">
@@ -1159,6 +1162,6 @@
     </div>
 
 </div>
- <script src="js/script.js"></script>
+<script src="js/script.js?v=<?php echo filemtime('js/script.js'); ?>"></script>
 </body>
 </html>

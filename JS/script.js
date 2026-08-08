@@ -5,7 +5,7 @@ Nemo Client Version
 ===========================================
 */
 
-const NEMO_VERSION = "1.0.8 Beta";
+const NEMO_VERSION = "1.0.9 Beta";
 
 /*
 ===========================================
@@ -1404,6 +1404,18 @@ async function checkNemoStatus(){
 
         if(res.ok){
 
+             const slider =
+        envToggle.nextElementSibling;
+
+    if(slider){
+
+        slider.style.setProperty(
+            "--toggle-ball-color",
+            "#ffffff"
+        );
+
+    }
+
             startNemoBtn.disabled = true;
 
             startNemoBtn.style.opacity = "0.6";
@@ -1415,24 +1427,120 @@ async function checkNemoStatus(){
                 <i class="fas fa-play"></i>
                 Neemo Running
             `;
+            /*
+    |--------------------------------------------------------------------------
+    | DISABLE DEPENDENT CONTROLS
+    |--------------------------------------------------------------------------
+    */
+   envToggle.disabled=false;
+
+    uploadImageBtn.disabled = false;
+    uploadImageBtn.style.opacity = "1";
+    uploadImageBtn.style.cursor = "pointer";
+
+    uploadHtmlCssBtn.disabled = false;
+    uploadHtmlCssBtn.style.opacity = "1";
+    uploadHtmlCssBtn.style.cursor = "pointer";
+
+    startServerBtn.disabled = false;
+    startServerBtn.style.opacity = "1";
+    startServerBtn.style.cursor = "pointer";
+
+    stopServerBtn.disabled = false;
+    stopServerBtn.style.opacity = "1";
+    stopServerBtn.style.cursor = "pointer";
+
+    restartServerBtn.disabled = false;
+    restartServerBtn.style.opacity = "1";
+    restartServerBtn.style.cursor = "pointer";
 
         }else{
 
             throw new Error();
         }
 
-    }catch(error){
+    } catch(error){
 
-        startNemoBtn.disabled = false;
+    console.error("Neemo status check failed:", error);
 
-        startNemoBtn.style.opacity = "1";
+    /*
+    |--------------------------------------------------------------------------
+    | SWITCH BACK TO LOCAL
+    |--------------------------------------------------------------------------
+    */
 
-        startNemoBtn.style.cursor =
-            "pointer";
+    environment = "local";
 
-        startNemoText.textContent =
-            "Start Nemo";
+    envToggle.checked = false;
+    envToggle.disabled = true;
+
+    localLabel.classList.add("active");
+    devLabel.classList.remove("active");
+
+    logsPanel.classList.remove("dev-mode");
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SLIDER BALL → RED
+    |--------------------------------------------------------------------------
+    */
+
+    const slider =
+        envToggle.nextElementSibling;
+
+    if(slider){
+
+        slider.style.setProperty(
+            "--toggle-ball-color",
+            "#ef4444"
+        );
+
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | NEMO BUTTON
+    |--------------------------------------------------------------------------
+    */
+
+    startNemoBtn.disabled = false;
+
+    startNemoBtn.style.opacity = "1";
+
+    startNemoBtn.style.cursor = "pointer";
+
+    startNemoText.textContent =
+        "Start Nemo";
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DISABLE DEPENDENT CONTROLS
+    |--------------------------------------------------------------------------
+    */
+
+    uploadImageBtn.disabled = true;
+    uploadImageBtn.style.opacity = "0.6";
+    uploadImageBtn.style.cursor = "not-allowed";
+
+    uploadHtmlCssBtn.disabled = true;
+    uploadHtmlCssBtn.style.opacity = "0.6";
+    uploadHtmlCssBtn.style.cursor = "not-allowed";
+
+    startServerBtn.disabled = true;
+    startServerBtn.style.opacity = "0.6";
+    startServerBtn.style.cursor = "not-allowed";
+
+    stopServerBtn.disabled = true;
+    stopServerBtn.style.opacity = "0.6";
+    stopServerBtn.style.cursor = "not-allowed";
+
+    restartServerBtn.disabled = true;
+    restartServerBtn.style.opacity = "0.6";
+    restartServerBtn.style.cursor = "not-allowed";
+}
 }
 checkNemoStatus();
 
