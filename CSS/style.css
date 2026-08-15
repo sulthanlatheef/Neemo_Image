@@ -5932,15 +5932,16 @@ body {
 
     color:#94a3b8;
 
-    font-size:13px;
+    font-size:13.8px;
 
 }
 
 .nemo-footer span{
 
     color:#60a5fa;
+    font-family: "JetBrains Mono", monospace;
 
-    font-weight:600;
+    font-weight:900;
 
 }
 .selected-file{
@@ -7502,7 +7503,995 @@ IMAGE DROP CARD
 
     .upload-success{
         margin-top:14px;
+
         font-size:14px;
     }
 
+}
+/* =========================================================
+   NEMO SETTINGS ICON
+========================================================= */
+
+.nemo-settings {
+    cursor: pointer;
+    padding-left: 15px;
+    font-size: 30px;
+
+    transition:
+        color 0.25s ease,
+        transform 0.25s ease,
+        filter 0.25s ease;
+}
+
+.nemo-settings:hover {
+    transform: scale(1.15);
+}
+
+
+/* =========================================================
+   NEMO SETTINGS MODAL
+========================================================= */
+
+.nemo-settings-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    visibility: hidden;
+    opacity: 0;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+}
+
+.nemo-settings-modal.active {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+/* =========================================================
+   BACKDROP
+========================================================= */
+
+.nemo-settings-backdrop {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(0, 0, 0, 0.62);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+
+/* =========================================================
+   DIALOG
+========================================================= */
+
+.nemo-settings-dialog {
+    position: relative;
+
+    width: min(1060px, calc(100vw - 40px));
+    min-height: 800px;
+    max-height: calc(100vh - 50px);
+
+    overflow: hidden;
+
+    border-radius: 26px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.075),
+            rgba(255, 255, 255, 0.025)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.11);
+
+    box-shadow:
+        0 35px 100px rgba(0, 0, 0, 0.58),
+        0 0 0 1px rgba(255, 255, 255, 0.025);
+
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+
+    transform: translateY(18px) scale(0.97);
+
+    transition:
+        transform 0.32s cubic-bezier(.2, .8, .2, 1);
+}
+
+.nemo-settings-modal.active .nemo-settings-dialog {
+    transform: translateY(0) scale(1);
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.nemo-settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 24px 28px 21px;
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.nemo-settings-heading {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.nemo-settings-title-icon {
+    width: 74px;
+    height: 74px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.095),
+            rgba(255, 255, 255, 0.035)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.075);
+
+    color: rgba(255, 255, 255, 0.82);
+
+    font-size: 20px;
+
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.nemo-settings-heading h2 {
+    margin: 0;
+
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: -0.2px;
+     font-family: "JetBrains Mono", monospace;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffffff,
+            rgba(180, 220, 255, 0.82)
+        );
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.nemo-settings-heading span {
+    display: block;
+ font-family: "JetBrains Mono", monospace;
+    margin-top: 4px;
+
+    color: rgba(255, 255, 255, 0.36);
+
+    font-size: 16.5px;
+    letter-spacing: 0.1px;
+}
+
+
+/* =========================================================
+   CLOSE BUTTON
+========================================================= */
+
+.nemo-settings-close {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: rgba(255, 255, 255, 0.45);
+
+    cursor: pointer;
+
+    font-size: 17px;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.nemo-settings-close:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+
+    transform: scale(1.08);
+}
+
+
+/* =========================================================
+   SETTINGS TABS
+   Selected tab highlights itself.
+   No separate indicator element required.
+========================================================= */
+
+.nemo-settings-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 15px;
+
+    margin: 18px 28px 0;
+    padding: 5px;
+
+    min-height: 53px;
+
+    box-sizing: border-box;
+
+    border-radius: 15px;
+
+    background: rgba(255, 255, 255, 0.025);
+
+    border: 1px solid rgba(255, 255, 255, 0.055);
+
+    box-shadow:
+        inset 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.nemo-settings-tab {
+    width: 100%;
+    height: 53px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 0 14px;
+
+    border: 1px solid transparent;
+    border-radius: 11px;
+
+    background: transparent;
+
+    color: rgba(255, 255, 255, 0.35);
+
+    cursor: pointer;
+
+    font-family: inherit;
+     font-family: "JetBrains Mono", monospace;
+    font-size: 17px;
+    font-weight: 700;
+
+    white-space: nowrap;
+
+    transition:
+        color 0.22s ease,
+        background 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease,
+        transform 0.22s ease;
+}
+
+.nemo-settings-tab:hover {
+    color: rgba(255, 255, 255, 0.72);
+
+    background: rgba(255, 255, 255, 0.035);
+
+    border-color: rgba(255, 255, 255, 0.035);
+}
+
+.nemo-settings-tab.active {
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.105),
+            rgba(255, 255, 255, 0.05)
+        );
+
+    border-color: rgba(255, 255, 255, 0.075);
+
+    box-shadow:
+        0 4px 14px rgba(0, 0, 0, 0.16),
+        inset 0 1px rgba(255, 255, 255, 0.045);
+}
+
+.nemo-settings-tab i {
+    font-size: 19px;
+
+    opacity: 0.65;
+
+    transition:
+        opacity 0.22s ease,
+        transform 0.22s ease;
+}
+
+.nemo-settings-tab.active i {
+    opacity: 1;
+    transform: scale(1.06);
+}
+
+
+/* =========================================================
+   CONTENT
+========================================================= */
+
+.nemo-settings-content {
+    min-height: 550px;
+
+    padding: 34px 38px 38px;
+}
+
+.nemo-settings-panel {
+    display: none;
+
+    animation: nemoSettingsPanelIn 0.25s ease;
+}
+
+.nemo-settings-panel.active {
+    display: block;
+}
+
+@keyframes nemoSettingsPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(7px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================================================
+   USER INFO
+========================================================= */
+
+
+
+.nemo-avatar-placeholder {
+    width: 270px;
+    height: 270px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.11),
+            rgba(255, 255, 255, 0.035)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.25),
+        inset 0 0 20px rgba(255, 255, 255, 0.025);
+
+    color: rgba(255, 255, 255, 0.55);
+
+    font-size: 28px;
+}
+#nemoVersion {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 0.4px;
+
+    background: linear-gradient(
+        90deg,
+        #8b5cf6,
+        #06b6d4
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+.nemo-user-name {
+    text-align: center;
+
+      font-family: "JetBrains Mono", monospace;
+
+    font-size: 21px;
+    font-weight: 800;
+
+    letter-spacing: 0.2px;
+
+    color: #ffffff;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,0.08),
+            rgba(255,255,255,0.025)
+        );
+
+    padding: 7px 18px;
+
+    border-radius: 12px;
+
+    width: fit-content;
+    margin: 0 auto;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    box-shadow:
+        0 6px 20px rgba(0,0,0,0.20);
+
+    backdrop-filter: blur(10px);
+}
+
+.nemo-user-subtitle {
+    margin-top: 4px;
+
+    text-align: center;
+    
+
+    color: rgba(255, 255, 255, 0.35);
+
+    font-size: 14px;
+}
+.nemo-user-avatar {
+    margin-left:335px;
+    margin-bottom:20px;
+    width: 310px;
+    height: 310px;
+
+    border-radius: 50%;
+    overflow: hidden;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(255, 255, 255, 0.04);
+
+    border: 2px solid rgba(255, 255, 255, 0.12);
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.25),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.nemo-avatar-image {
+    width: 91%;
+    height: 91%;
+    margin-bottom:10px;
+
+    display: block;
+    object-fit: contain;
+}
+
+
+
+/* =========================================================
+   USER DETAILS
+========================================================= */
+
+.nemo-user-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 12px;
+
+    margin-top: 32px;
+}
+
+.nemo-user-detail {
+    display: flex;
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 15px;
+
+    min-height: 62px;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.045),
+            rgba(255, 255, 255, 0.018)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.055);
+
+    transition:
+        background 0.25s ease,
+        border-color 0.25s ease,
+        transform 0.25s ease;
+}
+
+.nemo-user-detail:hover {
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.065),
+            rgba(255, 255, 255, 0.025)
+        );
+
+    border-color: rgba(255, 255, 255, 0.09);
+
+    transform: translateY(-2px);
+}
+
+.nemo-detail-icon {
+    width: 50px;
+    height: 50px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, 0.055);
+
+    color: rgba(255, 255, 255, 0.55);
+
+    font-size: 15px;
+}
+
+.nemo-detail-content {
+    display: flex;
+    flex-direction: column;
+
+
+    gap: 4px;
+}
+
+.nemo-detail-label {
+    color: rgba(255, 255, 255, 0.35);
+     font-family: "JetBrains Mono", monospace;
+
+    
+
+    font-size: 17.5px;
+}
+
+.nemo-detail-content strong {
+    color: rgba(255, 255, 255, 0.88);
+     font-family: "JetBrains Mono", monospace;
+       
+
+    font-size: 19.5px;
+    font-weight: 900;
+}
+
+
+/* =========================================================
+   USAGE STATISTICS
+========================================================= */
+
+.nemo-usage-header {
+    text-align: center;
+}
+
+.nemo-usage-header h3 {
+    margin: 0;
+    
+
+    color: #ffffff;
+font-family: "JetBrains Mono", monospace;
+    font-size: 23px;
+    font-weight: 900;
+}
+
+.nemo-usage-header span {
+    display: block;
+
+    margin-top: 6px;
+
+    color: rgba(255, 255, 255, 0.38);
+
+    font-size: 13.5px;
+}
+
+.nemo-usage-circle {
+    width: 320px;
+    height: 320px;
+
+    margin: 34px auto 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background:
+        conic-gradient(
+            rgba(255, 255, 255, 0.72) 0deg,
+            rgba(255, 255, 255, 0.72) 0deg,
+            rgba(255, 255, 255, 0.045) 0deg
+        );
+
+    position: relative;
+
+    box-shadow:
+        0 15px 45px rgba(0, 0, 0, 0.2);
+}
+
+.nemo-usage-circle::before {
+    content: "";
+
+    position: absolute;
+
+    inset: 8px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.035),
+            rgba(255, 255, 255, 0.012)
+        );
+
+    border: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.nemo-usage-circle-inner {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+}
+
+.nemo-usage-circle-inner strong {
+    color: #ffffff;
+font-family: "JetBrains Mono", monospace;
+ background: linear-gradient(
+        90deg,
+        #8b5cf6,
+        #06b6d4
+    );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-size: 60px;
+    line-height: 1;
+
+    font-weight: 900;
+    letter-spacing: -1px;
+}
+
+.nemo-usage-circle-inner span {
+    margin-top: 8px;
+
+    color: rgba(255, 255, 255, 0.4);
+
+    font-size: 15px;
+}
+
+.nemo-usage-description {
+    text-align: center;
+
+    color: rgba(255, 255, 255, 0.35);
+
+    font-size: 16px;
+}
+
+
+/* =========================================================
+   BUG REPORT
+========================================================= */
+
+.nemo-bug-header {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    margin-bottom: 28px;
+}
+
+.nemo-bug-icon {
+    width: 50px;
+    height: 50px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 13px;
+
+    background: rgba(255, 255, 255, 0.06);
+
+    color: rgba(255, 255, 255, 0.7);
+
+    font-size: 26px;
+}
+
+.nemo-bug-header h3 {
+    margin: 0;
+    font-family: "JetBrains Mono", monospace;
+
+    color: #ffffff;
+
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.nemo-bug-header span {
+    display: block;
+    font-family: "JetBrains Mono", monospace;
+
+    margin-top: 3px;
+
+    color: rgba(255, 255, 255, 0.38);
+
+    font-size: 15.6px;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.nemo-form-group {
+    margin-bottom: 18px;
+}
+
+.nemo-form-group label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: rgba(255, 255, 255, 0.55);
+
+    font-size: 16.5px;
+}
+
+.nemo-form-group input,
+.nemo-form-group textarea {
+    width: 100%;
+
+    box-sizing: border-box;
+
+    border: 1px solid rgba(255, 255, 255, 0.075);
+
+    border-radius: 11px;
+
+    outline: none;
+
+    background: rgba(255, 255, 255, 0.035);
+
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 16.5px;
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.nemo-form-group input {
+    height: 46px;
+
+    padding: 0 14px;
+}
+
+.nemo-form-group textarea {
+    min-height: 125px;
+
+    padding: 13px 14px;
+
+    resize: vertical;
+}
+
+.nemo-form-group input::placeholder,
+.nemo-form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.22);
+}
+
+.nemo-form-group input:focus,
+.nemo-form-group textarea:focus {
+    border-color: rgba(255, 255, 255, 0.2);
+
+    background: rgba(255, 255, 255, 0.05);
+}
+
+
+/* =========================================================
+   RAISE BUG BUTTON
+========================================================= */
+
+.nemo-raise-bug-btn {
+    width: 170px;
+    height: 50px;
+    
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    border: 1px solid rgba(0, 174, 255, 0.45);
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0, 174, 255, 0.18),
+            rgba(0, 110, 255, 0.08)
+        );
+
+    color: #6fd8ff;
+
+    cursor: pointer;
+
+      font-family: "JetBrains Mono", monospace;
+    font-size: 20px;
+    font-weight: 900;
+
+    box-shadow:
+        0 0 0 1px rgba(0, 174, 255, 0.04),
+        0 0 12px rgba(0, 174, 255, 0.12);
+
+    backdrop-filter: blur(8px);
+
+    transition:
+        transform 0.22s ease,
+        background 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease,
+        color 0.22s ease;
+}
+
+
+.nemo-raise-bug-btn:hover {
+    transform: translateY(-2px);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0, 174, 255, 0.28),
+            rgba(0, 110, 255, 0.14)
+        );
+
+    color: #ffffff;
+
+    border-color:
+        rgba(0, 190, 255, 0.75);
+
+    box-shadow:
+        0 0 18px rgba(0, 174, 255, 0.28),
+        0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+
+.nemo-raise-bug-btn:active {
+    transform: translateY(0);
+
+    box-shadow:
+        0 0 10px rgba(0, 174, 255, 0.18);
+}
+.nemo-raise-bug-btn i {
+    font-size: 18px;
+
+    color: #38c8ff;
+
+    filter:
+        drop-shadow(
+            0 0 5px rgba(0, 190, 255, 0.65)
+        );
+
+    transition:
+        transform 0.22s ease,
+        color 0.22s ease;
+}
+
+
+.nemo-raise-bug-btn:hover i {
+    color: #ffffff;
+
+    transform:
+        translateX(1px)
+        rotate(-8deg);
+
+    filter:
+        drop-shadow(
+            0 0 7px rgba(0, 200, 255, 0.9)
+        );
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+
+    .nemo-settings-dialog {
+        width: calc(100vw - 24px);
+
+        min-height: 0;
+
+        max-height: calc(100vh - 24px);
+
+        border-radius: 20px;
+    }
+
+    .nemo-settings-content {
+        min-height: 420px;
+
+        padding: 26px 20px 28px;
+    }
+    
+
+    .nemo-user-details {
+        grid-template-columns: 1fr;
+    }
+
+    .nemo-settings-tabs {
+        gap: 5px;
+        margin-left: 18px;
+        margin-right: 18px;
+    }
+
+    .nemo-settings-tab {
+        height: 43px;
+        padding: 0 8px;
+    }
+
+    .nemo-settings-tab span {
+        display: none;
+    }
+
+    .nemo-settings-tab {
+        font-size: 15px;
+    }
+
+    .nemo-usage-circle {
+        width: 240px;
+        height: 240px;
+    }
+}
+.nemo-validation-error::placeholder {
+    color: #ef4444 !important;
+    font-weight:600;
+    font-family: "JetBrains Mono", monospace;
+    opacity: 1;
 }

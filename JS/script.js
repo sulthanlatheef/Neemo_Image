@@ -2025,29 +2025,57 @@ const imageSubtitle =
 const imageSuccess =
     document.getElementById("imageSuccess");
 
-imageCard.addEventListener("click",()=>{
+imageCard.addEventListener("click", (event) => {
+
+    event.preventDefault();
 
     imageFile.click();
 
 });
 
-imageFile.addEventListener("change",()=>{
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
 
-    if(!imageFile.files.length)
-        return;
+imageFile.addEventListener("change", () => {
 
     if (!imageFile.files.length)
-    return;
+        return;
 
-const fileName = imageFile.files[0].name;
+    const file = imageFile.files[0];
 
-selectedImageName.textContent =
-    fileName.length > 15
-        ? fileName.substring(0, 15) + "..."
-        : fileName;
+    // Check image size
+    if (file.size > MAX_IMAGE_SIZE) {
+
+        selectedImageName.textContent =
+            "Image too large. Max size 10 MB!";
+
+        selectedImageName.style.color =
+            "#ef4444";
+
+        setTimeout(() => {
+
+            selectedImageName.textContent =
+                "No image selected";
+
+            selectedImageName.style.color = "";
+
+        }, 3000);
+
+        // Clear the invalid file
+        imageFile.value = "";
+
+        return;
+    }
+
+    const fileName = file.name;
+
+    selectedImageName.textContent =
+        fileName.length > 15
+            ? fileName.substring(0, 15) + "..."
+            : fileName;
+
+    selectedImageName.style.color = "";
 
     imageSubtitle.innerHTML =
-
         '<i class="fa-solid fa-circle-check"></i> Image Selected';
 
     imageSubtitle.style.color =
@@ -2125,17 +2153,29 @@ imageCard.addEventListener(
     "click",
     async ()=>{
 
-    responseBox.style.color="#22c55e";
+    responseBox.style.color="#0bf160";
 
     if(!imageFile.files.length){
 
-        alert(
-            "Please select an image."
-        );
+    selectedImageName.textContent =
+        "Please select an image !";
 
-        return;
+    selectedImageName.style.color =
+        "#ef4444";
 
-    }
+    setTimeout(() => {
+
+        selectedImageName.textContent =
+            "No image selected";
+
+        selectedImageName.style.color =
+            "";
+
+    }, 3000);
+
+    return;
+
+}
 
     setLoading(
         "<p style='margin-top:-43px'>Processing Image...</p>"
@@ -2152,30 +2192,33 @@ imageCard.addEventListener(
         );
 
         const res = await fetch(
+    "api.php?action=upload_image",
+    {
+        method: "POST",
+        body: formData
+    }
+);
 
-            "api.php?action=upload_image",
+const data =
+    await res.json();
 
-            {
+stopResponseTimer();
 
-                method:"POST",
+if (!res.ok || data.status === "error") {
 
-                body:formData
+    throw new Error(
+        data.message ||
+        `Request failed with status ${res.status}`
+    );
 
-            }
+}
 
-        );
-
-        const data =
-            await res.json();
-
-        stopResponseTimer();
-
-        responseBox.textContent =
-            JSON.stringify(
-                data,
-                null,
-                2
-            );
+responseBox.textContent =
+    JSON.stringify(
+        data,
+        null,
+        2
+    );
 
     }
 
@@ -2239,13 +2282,71 @@ cssFile.addEventListener("change",()=>{
 
 });
 
-htmlFile.addEventListener("change",()=>{
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
-    if(!htmlFile.files.length)
+function displayFileName(element, file) {
+
+    element.textContent =
+        file.name.length > 20
+            ? file.name.substring(0, 20) + "..."
+            : file.name;
+
+}
+
+function showFileSizeError(element) {
+
+    element.textContent =
+        "Max size 10 MB";
+
+    element.style.color =
+        "#ef4444";
+
+    setTimeout(() => {
+
+        element.textContent =
+            "No file selected";
+
+        element.style.color =
+            "";
+
+    }, 3000);
+
+}
+
+
+// HTML FILE
+
+htmlFile.addEventListener("change", () => {
+
+    if (!htmlFile.files.length)
         return;
 
-    selectedHtmlName.textContent =
-        htmlFile.files[0].name;
+    const file =
+        htmlFile.files[0];
+
+    if (file.size > MAX_FILE_SIZE) {
+
+        showFileSizeError(
+            selectedHtmlName
+        );
+
+        htmlFile.value = "";
+
+        htmlCard.classList.remove(
+            "selected"
+        );
+
+        return;
+
+    }
+
+    displayFileName(
+        selectedHtmlName,
+        file
+    );
+
+    selectedHtmlName.style.color =
+        "";
 
     htmlCard.classList.add(
         "selected"
@@ -2253,27 +2354,44 @@ htmlFile.addEventListener("change",()=>{
 
 });
 
-htmlFile.addEventListener("change",()=>{
 
-    if(htmlFile.files.length){
+// CSS FILE
 
-        selectedHtmlName.textContent =
-            htmlFile.files[0].name;
+cssFile.addEventListener("change", () => {
+
+    if (!cssFile.files.length)
+        return;
+
+    const file =
+        cssFile.files[0];
+
+    if (file.size > MAX_FILE_SIZE) {
+
+        showFileSizeError(
+            selectedCssName
+        );
+
+        cssFile.value = "";
+
+        cssCard.classList.remove(
+            "selected"
+        );
+
+        return;
 
     }
 
-});
+    displayFileName(
+        selectedCssName,
+        file
+    );
 
+    selectedCssName.style.color =
+        "";
 
-
-cssFile.addEventListener("change",()=>{
-
-    if(cssFile.files.length){
-
-        selectedCssName.textContent =
-            cssFile.files[0].name;
-
-    }
+    cssCard.classList.add(
+        "selected"
+    );
 
 });
 
@@ -2289,13 +2407,28 @@ cssFile.addEventListener("change",()=>{
 
     async ()=>{
 
-        if(!htmlFile.files.length){
+       if(!htmlFile.files.length){
 
-            alert("Please select an HTML file.");
+    selectedHtmlName.textContent =
+        "Please select an HTML file";
 
-            return;
+    selectedHtmlName.style.color =
+        "#ef4444";
 
-        }
+    setTimeout(() => {
+
+        selectedHtmlName.textContent =
+            "No file selected";
+
+        selectedHtmlName.style.color =
+            "";
+
+    }, 3000);
+
+    return;
+
+}
+        responseBox.style.color="#0bf160";
 
         setLoading(
             "<p style='margin-top:-43px'>Generating JSON...</p>"
@@ -2323,33 +2456,33 @@ cssFile.addEventListener("change",()=>{
 
             }
 
-            const res =
-                await fetch(
+           const res =
+    await fetch(
+        "api.php?action=upload_html_css",
+        {
+            method: "POST",
+            body: formData
+        }
+    );
 
-                    "api.php?action=upload_html_css",
+const data =
+    await res.json();
 
-                    {
+stopResponseTimer();
 
-                        method:"POST",
+if (!res.ok || data.status === "error") {
+    throw new Error(
+        data.message ||
+        `Request failed with status ${res.status}`
+    );
+}
 
-                        body:formData
-
-                    }
-
-                );
-
-            const data =
-                await res.json();
-
-            stopResponseTimer();
-
-            responseBox.textContent =
-                JSON.stringify(
-                    data,
-                    null,
-                    2
-                );
-
+responseBox.textContent =
+    JSON.stringify(
+        data,
+        null,
+        2
+    );
         }
 
         catch(error){
@@ -3297,6 +3430,7 @@ async function updateWeather(){
             panel.classList.add(
                 "weather-rain"
             );
+            
 
         }else if(
             weatherType.includes(
@@ -3747,4 +3881,778 @@ setInterval(
 
 );
 
+async function syncRequestCount() {
+    try {
+
+        const response = await fetch(
+            "http://127.0.0.1:3001/request-count"
+        );
+
+        if (!response.ok) {
+            return;
+        }
+
+        const data = await response.json();
+
+        const count = data.count;
+
+        // No new requests
+        if (count === 0) {
+            return;
+        }
+
+        // Send count to local Flask
+        await fetch(
+            "http://127.0.0.1:3001/sync-request-count",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    count: count
+                })
+            }
+        );
+
+    } catch (error) {
+        console.error(
+            "Failed to sync request count:",
+            error
+        );
+    }
+}
+syncRequestCount();
+setInterval(syncRequestCount, 60000);
+
+/* =========================================================
+   NEMO SETTINGS
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const settingsBtn =
+        document.getElementById("nemoSettingsBtn");
+
+    const settingsModal =
+        document.getElementById("nemoSettingsModal");
+
+    const closeSettingsBtn =
+        document.getElementById("closeNemoSettingsBtn");
+
+    const settingsBackdrop =
+        document.querySelector(".nemo-settings-backdrop");
+
+    const settingsTabs =
+        document.querySelectorAll(".nemo-settings-tab");
+
+    const settingsPanels =
+        document.querySelectorAll(".nemo-settings-panel");
+
+
+
+    const bugForm =
+        document.getElementById("nemoBugForm");
+
+/* =====================================================
+   LOAD NEMO USER INFORMATION
+===================================================== */
+/* =====================================================
+   LOAD DAILY REQUEST COUNT
+===================================================== */
+
+async function loadNeemoDailyRequests() {
+
+    const requestsElement =
+        document.getElementById("nemoDailyRequests");
+
+
+    if (!requestsElement) {
+        return;
+    }
+
+
+    try {
+
+        /*
+         * Local Flask endpoint.
+         *
+         * Flask gets the user ID from .env
+         * and communicates with the global
+         * Neemo Controller Server.
+         */
+
+        const response = await fetch(
+            "http://127.0.0.1:3001/get-neemo-daily-request-count"
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Request failed with status ${response.status}`
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (result.status !== "success") {
+
+            throw new Error(
+                result.message ||
+                "Failed to load daily request count."
+            );
+
+        }
+
+
+        const requests =
+            result.data?.requests ?? 0;
+
+
+        /*
+         * Update UI
+         */
+
+        requestsElement.textContent =
+            requests;
+
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load daily request count:",
+            error
+        );
+
+
+        /*
+         * Keep a safe fallback
+         */
+
+        requestsElement.textContent =
+            "0";
+
+    }
+
+}
+
+async function loadNeemoUserInfo() {
+
+    const actualNameElement =
+        document.getElementById("nemoUserActualName");
+
+    const userIdElement =
+        document.getElementById("nemoUserId");
+
+    const userNameElement =
+        document.getElementById("nemoUserName");
+
+
+    try {
+
+        /*
+         * Local Flask endpoint.
+         *
+         * The user ID is NOT exposed here.
+         * Flask gets it from .env and communicates
+         * with the global Neemo Controller Server.
+         */
+
+        const response = await fetch(
+            "http://127.0.0.1:3001/get-neemo-user-info"
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                `Request failed with status ${response.status}`
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        if (result.status !== "success") {
+
+            throw new Error(
+                result.message ||
+                "Failed to load Neemo user information."
+            );
+
+        }
+
+
+        const user =
+            result.data;
+
+
+        /*
+         * Update UI
+         */
+
+        if (actualNameElement) {
+
+            actualNameElement.textContent =
+                user.actual_name || "Unknown User";
+
+        }
+
+
+        if (userIdElement) {
+
+            userIdElement.textContent =
+                user.user_id || "Unknown";
+
+        }
+
+
+        if (userNameElement) {
+
+            userNameElement.textContent =
+                user.user_name || "Unknown";
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "Failed to load Neemo user information:",
+            error
+        );
+
+
+        /*
+         * Fallback UI
+         */
+
+        if (actualNameElement) {
+            actualNameElement.textContent =
+                "Unable to load";
+        }
+
+
+        if (userIdElement) {
+            userIdElement.textContent =
+                "Unable to load";
+        }
+
+
+        if (userNameElement) {
+            userNameElement.textContent =
+                "Unable to load";
+        }
+
+    }
+
+}
+/* =====================================================
+   RANDOM VOXEL AVATAR
+===================================================== */
+
+function loadRandomVoxelAvatar() {
+
+    const avatar =
+        document.getElementById("nemoUserAvatar");
+
+    if (!avatar) {
+        return;
+    }
+
+    const seed =
+        crypto.randomUUID();
+
+   avatar.src =
+    `https://api.dicebear.com/10.x/voxel-bot/svg?seed=${encodeURIComponent(seed)}&backgroundColor=%23FFFFFF00&animationVariant=medium&animationProbability=100`;
+
+}
+/* =====================================================
+   LOAD NEMO VERSION
+===================================================== */
+
+function loadNeemoVersion() {
+
+    const versionElement =
+        document.getElementById("nemoVersion");
+
+    if (!versionElement) {
+        return;
+    }
+
+    versionElement.textContent =
+        NEMO_VERSION;
+}
+/* =====================================================
+   LOAD NEMO VERSION ON FOOTER
+===================================================== */
+
+function loadNeemoVersion_footer() {
+
+    const versionElement =
+        document.getElementById("nemoVersion_footer");
+
+    if (!versionElement) {
+        return;
+    }
+
+    versionElement.textContent =
+        NEMO_VERSION;
+}
+
+/* =====================================================
+   OPEN MODAL
+===================================================== */
+
+function openNemoSettings() {
+
+    settingsModal.classList.add("active");
+
+    settingsModal.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
+    document.body.style.overflow = "hidden";
+
+    /*
+     * Always open on User Info
+     */
+    switchSettingsTab("user");
+    
+
+    /*
+     * Generate a fresh Voxel avatar
+     * every time User Info is opened.
+     */
+    loadRandomVoxelAvatar();
+    loadNeemoUserInfo();
+    loadNeemoDailyRequests();
+}
+
+
+    /* =====================================================
+       CLOSE MODAL
+    ===================================================== */
+
+    function closeNemoSettings() {
+
+        settingsModal.classList.remove("active");
+
+        settingsModal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+        document.body.style.overflow = "";
+    }
+
+
+    /* =====================================================
+       TAB SWITCHING
+    ===================================================== */
+
+    function switchSettingsTab(tabName) {
+
+        settingsTabs.forEach(tab => {
+
+            const isActive =
+                tab.dataset.settingsTab === tabName;
+
+            tab.classList.toggle(
+                "active",
+                isActive
+            );
+
+        });
+
+
+        settingsPanels.forEach(panel => {
+
+            const isActive =
+                panel.dataset.settingsPanel === tabName;
+
+            panel.classList.toggle(
+                "active",
+                isActive
+            );
+
+        });
+
+
+        /*
+         * Move sliding indicator
+         */
+
+       
+
+    }
+
+
+    /* =====================================================
+       SETTINGS BUTTON
+    ===================================================== */
+
+    if (settingsBtn) {
+
+        settingsBtn.addEventListener(
+            "click",
+            openNemoSettings
+        );
+
+    }
+
+
+    /* =====================================================
+       CLOSE BUTTON
+    ===================================================== */
+
+    if (closeSettingsBtn) {
+
+        closeSettingsBtn.addEventListener(
+            "click",
+            closeNemoSettings
+        );
+
+    }
+
+
+    /* =====================================================
+       BACKDROP CLICK
+    ===================================================== */
+
+    if (settingsBackdrop) {
+
+        settingsBackdrop.addEventListener(
+            "click",
+            closeNemoSettings
+        );
+
+    }
+
+
+    /* =====================================================
+       TAB EVENTS
+    ===================================================== */
+
+    settingsTabs.forEach(tab => {
+
+        tab.addEventListener(
+            "click",
+            () => {
+
+                const tabName =
+                    tab.dataset.settingsTab;
+
+                switchSettingsTab(tabName);
+
+            }
+        );
+
+    });
+
+
+    /* =====================================================
+       ESCAPE KEY
+    ===================================================== */
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Escape" &&
+                settingsModal.classList.contains("active")
+            ) {
+
+                closeNemoSettings();
+
+            }
+
+        }
+    );
+
+
+  /* =====================================================
+   BUG FORM
+===================================================== */
+
+if (bugForm) {
+
+    bugForm.addEventListener(
+        "submit",
+        async event => {
+
+            event.preventDefault();
+
+
+            const title =
+                document.getElementById(
+                    "nemoBugTitle"
+                ).value.trim();
+
+
+            const description =
+                document.getElementById(
+                    "nemoBugDescription"
+                ).value.trim();
+
+
+            const submitButton =
+                bugForm.querySelector(
+                    ".nemo-raise-bug-btn"
+                );
+
+
+            /* ---------------------------------------------
+               VALIDATE INPUT
+            --------------------------------------------- */
+
+           if (!title || !description) {
+
+    const titleField =
+        document.getElementById(
+            "nemoBugTitle"
+        );
+
+    const descriptionField =
+        document.getElementById(
+            "nemoBugDescription"
+        );
+
+    const originalTitlePlaceholder =
+        titleField.placeholder;
+
+    const originalDescriptionPlaceholder =
+        descriptionField.placeholder;
+
+
+    if (!title) {
+
+        titleField.placeholder =
+            "Please provide a title.";
+
+        titleField.classList.add(
+            "nemo-validation-error"
+        );
+
+    }
+
+
+    if (!description) {
+
+        descriptionField.placeholder =
+            "Please provide a description.";
+
+        descriptionField.classList.add(
+            "nemo-validation-error"
+        );
+
+    }
+
+
+    setTimeout(() => {
+
+        if (!title) {
+
+            titleField.placeholder =
+                originalTitlePlaceholder;
+
+            titleField.classList.remove(
+                "nemo-validation-error"
+            );
+
+        }
+
+
+        if (!description) {
+
+            descriptionField.placeholder =
+                originalDescriptionPlaceholder;
+
+            descriptionField.classList.remove(
+                "nemo-validation-error"
+            );
+
+        }
+
+    }, 3000);
+
+
+    return;
+
+}
+
+
+            /* ---------------------------------------------
+               PREVENT DUPLICATE SUBMISSIONS
+            --------------------------------------------- */
+
+            if (submitButton.disabled) {
+                return;
+            }
+
+
+            /* ---------------------------------------------
+               SAVE ORIGINAL BUTTON CONTENT
+            --------------------------------------------- */
+
+            const originalButtonContent =
+                submitButton.innerHTML;
+
+
+            /* ---------------------------------------------
+               SHOW SPINNER
+            --------------------------------------------- */
+
+            submitButton.disabled = true;
+
+            submitButton.innerHTML = `
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Submitting
+            `;
+
+
+            try {
+
+                /* -----------------------------------------
+                   SEND TO LOCAL FLASK
+                ----------------------------------------- */
+
+                const response = await fetch(
+                    "http://127.0.0.1:3001/raise-neemo-bug",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            title: title,
+                            description: description
+                        })
+                    }
+                );
+
+
+                /* -----------------------------------------
+                   CHECK HTTP RESPONSE
+                ----------------------------------------- */
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        `Request failed with status ${response.status}`
+                    );
+
+                }
+
+
+                const result =
+                    await response.json();
+
+
+                /* -----------------------------------------
+                   CHECK API RESPONSE
+                ----------------------------------------- */
+
+                if (result.status !== "success") {
+
+                    throw new Error(
+                        result.message ||
+                        "Failed to submit bug."
+                    );
+
+                }
+
+
+                /* -----------------------------------------
+                   SUCCESS
+                ----------------------------------------- */
+
+                submitButton.innerHTML = `
+                    <i class="fa-solid fa-check"></i>
+                    Success
+                `;
+
+
+                /*
+                 * Clear the form after successful submission.
+                 */
+
+                bugForm.reset();
+
+
+                /*
+                 * Keep Success visible briefly,
+                 * then restore the button.
+                 */
+
+                setTimeout(() => {
+
+                    submitButton.innerHTML =
+                        originalButtonContent;
+
+                    submitButton.disabled = false;
+
+                }, 1800);
+
+
+            } catch (error) {
+
+                console.error(
+                    "Failed to submit Neemo bug:",
+                    error
+                );
+
+
+                /* -----------------------------------------
+                   ERROR
+                ----------------------------------------- */
+
+                submitButton.innerHTML = `
+                    
+                    Error!
+                `;
+
+
+                /*
+                 * Restore button after showing Error.
+                 */
+
+                setTimeout(() => {
+
+                    submitButton.innerHTML =
+                        originalButtonContent;
+
+                    submitButton.disabled = false;
+
+                }, 1800);
+
+            }
+
+        }
+    );
+
+}
+
+
+    /* =====================================================
+       INITIAL STATE
+    ===================================================== */
+
+    switchSettingsTab("user");
+    loadNeemoVersion();
+    loadNeemoVersion_footer();
+
+});
 

@@ -23,7 +23,10 @@ $devControllerBaseUrl = "http://127.0.0.1:3001";
 |--------------------------------------------------------------------------
 */
 function postMultipartRequest($url)
+
 {
+     error_log("===== MULTIPART DEBUG =====");
+    error_log("FILES: " . print_r($_FILES, true));
     $ch = curl_init();
 
     $postFields = [];
