@@ -5,7 +5,7 @@ Nemo Client Version
 ===========================================
 */
 
-const NEMO_VERSION = "1.2.1 Beta";
+const NEMO_VERSION = "1.2.2 Beta";
 
 /*
 ===========================================
@@ -52,6 +52,9 @@ const selectImageBtn =
 
 const uploadImageBtn =
     document.getElementById("uploadImageBtn");
+let imageUploadRunning = false;
+let generateRunning = false;
+let flaskIsRunning = false;
 
 const selectedImageName =
     document.getElementById("selectedImageName");
@@ -164,6 +167,46 @@ const devLabel = document.getElementById("devLabel");
 const logsPanel = document.getElementById("logsPanel");
 
 let environment = "local";
+
+function updateUploadImageButtonState() {
+
+    const shouldDisable =
+        !flaskIsRunning ||
+        imageUploadRunning;
+
+    uploadImageBtn.disabled =
+        shouldDisable;
+
+    uploadImageBtn.style.opacity =
+        shouldDisable
+            ? "0.6"
+            : "1";
+
+    uploadImageBtn.style.cursor =
+        shouldDisable
+            ? "not-allowed"
+            : "pointer";
+}
+
+function generateButtonState() {
+
+    const shouldDisable =
+        !flaskIsRunning ||
+        generateRunning;
+
+    uploadHtmlCssBtn.disabled =
+        shouldDisable;
+
+    uploadHtmlCssBtn.style.opacity =
+        shouldDisable
+            ? "0.6"
+            : "1";
+
+    uploadHtmlCssBtn.style.cursor =
+        shouldDisable
+            ? "not-allowed"
+            : "pointer";
+}
 
 envToggle.addEventListener("change", async function () {
 
@@ -629,6 +672,8 @@ let currentMatchIndex = -1;
 
 let currentSearchText = "";
 let normalSearchMatches = [];
+let fullResponseText = "";
+const RESPONSE_PREVIEW_LINES = 100;
 
 let normalMatchIndex = -1;
 
@@ -1193,9 +1238,9 @@ normalMatchIndex = -1;
     try{
 
         const json =
-            JSON.parse(
-                responseBox.textContent
-            );
+    JSON.parse(
+        fullResponseText
+    );
 
        const jsonText =
     JSON.stringify(
@@ -1234,7 +1279,7 @@ renderNormalRows();
     }catch{
 
         modalResponseContainer.textContent =
-            responseBox.textContent;
+    fullResponseText;        
     }
 
     responseModal.classList.add(
@@ -1331,19 +1376,97 @@ function applyDebugHighlight(){
 }
 function openLogsModal(){
 
-    modalLogContainer.innerHTML =
-        logContainer.innerHTML;
+    /*
+    |--------------------------------------------------------------------------
+    | CLEAR OLD MODAL DOM
+    |--------------------------------------------------------------------------
+    */
+
+    modalLogContainer.replaceChildren();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | COPY CURRENT LOG BUFFER
+    |--------------------------------------------------------------------------
+    */
+
+    const logs =
+        Array.from(
+            logContainer.children
+        );
+
+    logs.forEach(
+        (line)=>{
+
+            const modalLine =
+                line.cloneNode(true);
+
+            modalLogContainer.appendChild(
+                modalLine
+            );
+
+        }
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | APPLY CURRENT FILTERS
+    |--------------------------------------------------------------------------
+    */
+
+    filterLogs();
 
     applyDebugHighlight();
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | OPEN MODAL
+    |--------------------------------------------------------------------------
+    */
 
     logsModal.classList.add(
         "active"
     );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STICK TO BOTTOM
+    |--------------------------------------------------------------------------
+    */
+
+    if(stickToBottom){
+
+        modalLogContainer.scrollTop =
+            modalLogContainer.scrollHeight;
+
+    }
+
 }
 function closeLogsViewer(){
-    
 
-    logsModal.classList.remove("active");
+    /*
+    |--------------------------------------------------------------------------
+    | CLOSE MODAL
+    |--------------------------------------------------------------------------
+    */
+
+    logsModal.classList.remove(
+        "active"
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | DESTROY MODAL LOG DOM
+    |--------------------------------------------------------------------------
+    */
+
+    modalLogContainer.replaceChildren();
+
 }
 
 
@@ -1434,13 +1557,10 @@ async function checkNemoStatus(){
     */
    envToggle.disabled=false;
 
-    uploadImageBtn.disabled = false;
-    uploadImageBtn.style.opacity = "1";
-    uploadImageBtn.style.cursor = "pointer";
+    flaskIsRunning = true;
+    updateUploadImageButtonState();
 
-    uploadHtmlCssBtn.disabled = false;
-    uploadHtmlCssBtn.style.opacity = "1";
-    uploadHtmlCssBtn.style.cursor = "pointer";
+    generateButtonState();
 
     startServerBtn.disabled = false;
     startServerBtn.style.opacity = "1";
@@ -1521,13 +1641,10 @@ async function checkNemoStatus(){
     |--------------------------------------------------------------------------
     */
 
-    uploadImageBtn.disabled = true;
-    uploadImageBtn.style.opacity = "0.6";
-    uploadImageBtn.style.cursor = "not-allowed";
+   flaskIsRunning = false;
+   updateUploadImageButtonState();
 
-    uploadHtmlCssBtn.disabled = true;
-    uploadHtmlCssBtn.style.opacity = "0.6";
-    uploadHtmlCssBtn.style.cursor = "not-allowed";
+   generateButtonState();
 
     startServerBtn.disabled = true;
     startServerBtn.style.opacity = "0.6";
@@ -1588,216 +1705,436 @@ function updateLogWarningState() {
 
 let lastLogCount = 0;
 
+/*
+|--------------------------------------------------------------------------
+| LOG DOM MEMORY LIMIT
+|--------------------------------------------------------------------------
+| Keep the normal log container between ~100 and 200 logs.
+| When it exceeds 200, remove the oldest 100.
+|--------------------------------------------------------------------------
+*/
+
+const MAX_LOG_DOM = 200;
+const TRIM_LOG_DOM = 100;
+
 async function fetchLogs(){
-    
 
     try{
+
+        /*
+        |--------------------------------------------------------------------------
+        | PREVENT OVERLAPPING REQUESTS
+        |--------------------------------------------------------------------------
+        */
+
+        if(fetchLogs.running){
+            return;
+        }
+
+        fetchLogs.running = true;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | FETCH LOGS
+        |--------------------------------------------------------------------------
+        */
 
         const res = await fetch(
             "http://127.0.0.1:3001/logs"
         );
 
-        const data = await res.json();
+        const data =
+            await res.json();
 
-        const logs = data.logs || [];
+        const logs =
+            data.logs || [];
+
 
         /*
         |--------------------------------------------------------------------------
-        | APPEND ONLY NEW LOGS
+        | TOTAL SERVER LOG COUNT
         |--------------------------------------------------------------------------
         */
-         
-        if(logs.length > lastLogCount){
+
+        totalLogCount =
+            logs.length;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | SERVER LOG RESET DETECTION
+        |--------------------------------------------------------------------------
+        */
+
+        if(logs.length < lastLogCount){
+
+            lastLogCount = 0;
 
             /*
-            |--------------------------------------------------------------------------
-            | REMOVE WAITING MESSAGE
-            |--------------------------------------------------------------------------
+            | Clear normal log DOM on reset
+            */
+
+            //logContainer.replaceChildren();
+
+            /*
+            | Modal is cleared only if currently open
             */
 
             if(
-                logContainer.innerHTML.includes(
-                    "Waiting for logs"
+                logsModal.classList.contains(
+                    "active"
                 )
             ){
 
-                logContainer.innerHTML = "";
+                modalLogContainer.replaceChildren();
+
             }
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | NO NEW LOGS
+        |--------------------------------------------------------------------------
+        */
+
+        if(logs.length === lastLogCount){
+
+            updateLogWarningState();
+
+            return;
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | REMOVE WAITING MESSAGE
+        |--------------------------------------------------------------------------
+        */
+
+        const waitingMessage =
+            logContainer.querySelector(
+                ".waiting-log"
+            );
+
+        if(waitingMessage){
+
+            waitingMessage.remove();
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CALCULATE WHAT SHOULD ACTUALLY BE RENDERED
+        |--------------------------------------------------------------------------
+        |
+        | Never render more than the newest 200 logs.
+        |
+        */
+
+        const startIndex =
+            Math.max(
+                lastLogCount,
+                logs.length - MAX_LOG_DOM
+            );
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | ADD ONLY NECESSARY LOGS
+        |--------------------------------------------------------------------------
+        */
+
+        for(
+            let i = startIndex;
+            i < logs.length;
+            i++
+        ){
+
+            const line =
+                document.createElement("div");
+
 
             /*
             |--------------------------------------------------------------------------
-            | ADD NEW LOGS
+            | LOG TEXT
             |--------------------------------------------------------------------------
             */
 
+            line.textContent =
+                logs[i];
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | LOG CARD STYLE
+            |--------------------------------------------------------------------------
+            */
+
+            line.style.marginBottom =
+                "10px";
+
+            line.style.padding =
+                "10px 14px";
+
+            line.style.borderRadius =
+                "14px";
+
+            line.style.fontWeight =
+                "500";
+
+            line.style.wordBreak =
+                "break-word";
+
+            line.style.transition =
+                "0.25s";
+
+            line.style.border =
+                "1px solid rgba(255,255,255,0.05)";
+
+            line.style.backdropFilter =
+                "blur(12px)";
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | ALTERNATING COLORS
+            |--------------------------------------------------------------------------
+            */
+
+            if(i % 2 === 0){
+
+                /*
+                |--------------------------------------------------------------------------
+                | GREEN LOG
+                |--------------------------------------------------------------------------
+                */
+
+                line.style.color =
+                    "#00ff88";
+
+                line.style.background =
+                    "rgba(0,255,136,0.07)";
+
+                line.style.boxShadow =
+                    "0 0 18px rgba(0,255,136,0.08)";
+
+            }else{
+
+                /*
+                |--------------------------------------------------------------------------
+                | BLUE LOG
+                |--------------------------------------------------------------------------
+                */
+
+                line.style.color =
+                    "#38bdf8";
+
+                line.style.background =
+                    "rgba(56,189,248,0.07)";
+
+                line.style.boxShadow =
+                    "0 0 18px rgba(56,189,248,0.08)";
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | HOVER EFFECT
+            |--------------------------------------------------------------------------
+            */
+
+            line.addEventListener(
+                "mouseenter",
+                ()=>{
+
+                    line.style.transform =
+                        "translateX(4px)";
+                }
+            );
+
+            line.addEventListener(
+                "mouseleave",
+                ()=>{
+
+                    line.style.transform =
+                        "translateX(0px)";
+                }
+            );
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | APPEND TO NORMAL LOG CONTAINER
+            |--------------------------------------------------------------------------
+            */
+
+            logContainer.appendChild(
+                line
+            );
+
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | TRIM NORMAL LOG DOM
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            logContainer.children.length >
+            MAX_LOG_DOM
+        ){
+
             for(
-                let i = lastLogCount;
-                i < logs.length;
+                let i = 0;
+                i < TRIM_LOG_DOM;
                 i++
             ){
 
-                const line =
-                    document.createElement("div");
+                if(
+                    logContainer.firstElementChild
+                ){
 
-                line.textContent =
-                    logs[i];
+                    logContainer.removeChild(
+                        logContainer.firstElementChild
+                    );
 
-                /*
-                |--------------------------------------------------------------------------
-                | LOG CARD STYLE
-                |--------------------------------------------------------------------------
-                */
-
-                line.style.marginBottom =
-                    "10px";
-
-                line.style.padding =
-                    "10px 14px";
-
-                line.style.borderRadius =
-                    "14px";
-
-                line.style.fontWeight =
-                    "500";
-
-                line.style.wordBreak =
-                    "break-word";
-
-                line.style.transition =
-                    "0.25s";
-
-                line.style.border =
-                    "1px solid rgba(255,255,255,0.05)";
-
-                line.style.backdropFilter =
-                    "blur(12px)";
-
-                /*
-                |--------------------------------------------------------------------------
-                | ALTERNATING COLORS
-                |--------------------------------------------------------------------------
-                */
-
-                if(i % 2 === 0){
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | GREEN LOG
-                    |--------------------------------------------------------------------------
-                    */
-
-                    line.style.color =
-                        "#00ff88";
-
-                    line.style.background =
-                        "rgba(0,255,136,0.07)";
-
-                    line.style.boxShadow =
-                        "0 0 18px rgba(0,255,136,0.08)";
-
-                }else{
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | BLUE LOG
-                    |--------------------------------------------------------------------------
-                    */
-
-                    line.style.color =
-                        "#38bdf8";
-
-                    line.style.background =
-                        "rgba(56,189,248,0.07)";
-
-                    line.style.boxShadow =
-                        "0 0 18px rgba(56,189,248,0.08)";
                 }
 
-                /*
-                |--------------------------------------------------------------------------
-                | HOVER EFFECT
-                |--------------------------------------------------------------------------
-                */
-
-                line.addEventListener(
-                    "mouseenter",
-                    ()=>{
-
-                        line.style.transform =
-                            "translateX(4px)";
-                    }
-                );
-
-                line.addEventListener(
-                    "mouseleave",
-                    ()=>{
-
-                        line.style.transform =
-                            "translateX(0px)";
-                    }
-                );
-
-                /*
-                |--------------------------------------------------------------------------
-                | APPEND
-                |--------------------------------------------------------------------------
-                */
-
-                logContainer.appendChild(line);
-                updateLogWarningState();
-                const modalLine =
-    line.cloneNode(true);
-
-modalLogContainer.appendChild(
-    modalLine
-);
-if(
-    logSearchInput.value &&
-    !modalLine.textContent
-        .toLowerCase()
-        .includes(
-            logSearchInput.value
-            .toLowerCase()
-        )
-){
-
-    modalLine.style.display = "none";
-}
-if(stickToBottom){
-
-    modalLogContainer.scrollTop =
-        modalLogContainer.scrollHeight;
-}
-if(
-    debugFilterEnabled &&
-    modalLine.textContent
-        .toLowerCase()
-        .includes("neemo")
-){
-
-    modalLine.classList.add(
-        "debug-highlight"
-    );
-}
-                
             }
 
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE LAST LOG COUNT
+        |--------------------------------------------------------------------------
+        */
+
+        lastLogCount =
+            logs.length;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | UPDATE WARNING STATE
+        |--------------------------------------------------------------------------
+        */
+
+        updateLogWarningState();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTO SCROLL NORMAL LOG CONTAINER
+        |--------------------------------------------------------------------------
+        */
+
+        logContainer.scrollTop =
+            logContainer.scrollHeight;
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | MODAL IS ONLY UPDATED WHEN IT IS ACTUALLY OPEN
+        |--------------------------------------------------------------------------
+        |
+        | Hidden modal log elements are NOT kept alive.
+        |
+        */
+
+        if(
+            logsModal.classList.contains(
+                "active"
+            )
+        ){
+
             /*
             |--------------------------------------------------------------------------
-            | UPDATE COUNT
+            | REBUILD MODAL FROM CURRENT NORMAL LOG BUFFER
             |--------------------------------------------------------------------------
             */
 
-            lastLogCount = logs.length;
+            modalLogContainer.replaceChildren();
+
+            const normalLogs =
+                Array.from(
+                    logContainer.children
+                );
+
+            normalLogs.forEach(
+                (sourceLine)=>{
+
+                    const modalLine =
+                        sourceLine.cloneNode(true);
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | SEARCH FILTER
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if(
+                        logSearchInput.value &&
+                        !modalLine.textContent
+                            .toLowerCase()
+                            .includes(
+                                logSearchInput.value
+                                    .toLowerCase()
+                            )
+                    ){
+
+                        modalLine.style.display =
+                            "none";
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | DEBUG HIGHLIGHT
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if(
+                        debugFilterEnabled &&
+                        modalLine.textContent
+                            .toLowerCase()
+                            .includes("neemo")
+                    ){
+
+                        modalLine.classList.add(
+                            "debug-highlight"
+                        );
+
+                    }
+
+
+                    modalLogContainer.appendChild(
+                        modalLine
+                    );
+
+                }
+            );
+
 
             /*
             |--------------------------------------------------------------------------
-            | AUTO SCROLL
+            | STICK TO BOTTOM
             |--------------------------------------------------------------------------
             */
 
-            logContainer.scrollTop =
-                logContainer.scrollHeight;
+            if(stickToBottom){
+
+                modalLogContainer.scrollTop =
+                    modalLogContainer.scrollHeight;
+
+            }
+
         }
 
     }catch(error){
@@ -1806,6 +2143,11 @@ if(
             "Log fetch error:",
             error
         );
+
+    }finally{
+
+        fetchLogs.running = false;
+
     }
 }
 
@@ -2152,6 +2494,7 @@ imageCard.addEventListener(
    uploadImageBtn.addEventListener(
     "click",
     async ()=>{
+   
 
     responseBox.style.color="#0bf160";
 
@@ -2176,6 +2519,9 @@ imageCard.addEventListener(
     return;
 
 }
+imageUploadRunning = true;
+
+updateUploadImageButtonState();
 
     setLoading(
         "<p style='margin-top:-43px'>Processing Image...</p>"
@@ -2212,17 +2558,24 @@ if (!res.ok || data.status === "error") {
     );
 
 }
+imageUploadRunning = false;
 
-responseBox.textContent =
+updateUploadImageButtonState();
+
+displayResponse(
     JSON.stringify(
         data,
         null,
         2
-    );
+    )
+);
 
     }
 
     catch(error){
+   imageUploadRunning = false;
+
+updateUploadImageButtonState();
 
         stopResponseTimer();
 
@@ -2395,6 +2748,93 @@ cssFile.addEventListener("change", () => {
 
 });
 
+/*
+|--------------------------------------------------------------------------
+| RESPONSE DISPLAY
+|--------------------------------------------------------------------------
+| Store the complete response but render only the first 100 lines
+| in the normal response panel.
+|--------------------------------------------------------------------------
+*/
+
+function displayResponse(text) {
+
+    fullResponseText =
+        String(text);
+
+    const newlinePositions = [];
+
+    let searchStart = 0;
+
+    for (
+        let i = 0;
+        i < RESPONSE_PREVIEW_LINES;
+        i++
+    ) {
+
+        const newlineIndex =
+            fullResponseText.indexOf(
+                "\n",
+                searchStart
+            );
+
+        if (newlineIndex === -1) {
+            break;
+        }
+
+        newlinePositions.push(
+            newlineIndex
+        );
+
+        searchStart =
+            newlineIndex + 1;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESPONSE FITS WITHIN PREVIEW LIMIT
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        newlinePositions.length <
+        RESPONSE_PREVIEW_LINES
+    ) {
+
+        responseBox.textContent =
+            fullResponseText;
+
+        return;
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SHOW ONLY FIRST 100 LINES
+    |--------------------------------------------------------------------------
+    */
+
+    const previewEnd =
+        newlinePositions[
+            RESPONSE_PREVIEW_LINES - 1
+        ];
+
+    const preview =
+        fullResponseText.slice(
+            0,
+            previewEnd
+        );
+
+    responseBox.textContent =
+        preview +
+        "\n\n" +
+        "────────────────────────────────────────\n" +
+        "Response preview limited to 100 lines.\n" +
+        "Please use the Expand Response button to view the complete response.\n" +
+        "────────────────────────────────────────";
+}
+
     /*
     |--------------------------------------------------------------------------
     | GENERATE JSON
@@ -2428,6 +2868,9 @@ cssFile.addEventListener("change", () => {
     return;
 
 }
+generateRunning = true;
+generateButtonState();
+
         responseBox.style.color="#0bf160";
 
         setLoading(
@@ -2477,17 +2920,22 @@ if (!res.ok || data.status === "error") {
     );
 }
 
-responseBox.textContent =
+displayResponse(
     JSON.stringify(
         data,
         null,
         2
-    );
+    )
+);
+generateRunning = false;
+generateButtonState();
         }
 
         catch(error){
 
             stopResponseTimer();
+            generateRunning = false;
+             generateButtonState();
 
             responseBox.style.color="#ef4444";
 
@@ -2511,8 +2959,8 @@ responseBox.textContent =
 
     copyBtn.addEventListener("click", async ()=>{
 
-        const text =
-            responseBox.textContent;
+       const text =
+    fullResponseText;
 
         if(!text.trim()){
             return;
@@ -3648,7 +4096,7 @@ function updateError(message){
     const title = document.getElementById("progressTitle");
 
 title.innerHTML =
-    '<i class="fa-solid fa-circle-exclamation blinking-icon"></i> Update Could Not Be Completed';
+    '<i class="fa-solid fa-circle-exclamation blinking-icon" style="color:#ef4444"></i>Update Could Not Be Completed !';
 
 title.style.color = "#ef4444";
 
