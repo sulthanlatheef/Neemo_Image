@@ -1548,7 +1548,7 @@ async function checkNemoStatus(){
 
              startNemoBtn.innerHTML = `
                 <i class="fas fa-play"></i>
-                Neemo Running
+                Neemo Active
             `;
             /*
     |--------------------------------------------------------------------------
@@ -1632,7 +1632,7 @@ async function checkNemoStatus(){
     startNemoBtn.style.cursor = "pointer";
 
     startNemoText.textContent =
-        "Start Nemo";
+        "Start Neemo";
 
 
     /*
@@ -3165,7 +3165,7 @@ startNemoBtn.addEventListener(
             // Show loading state
             startNemoBtn.innerHTML = `
                 <i class="fas fa-spinner fa-spin" style="font-size: 19.5px;"></i>
-                Starting Nemo...
+                Starting Neemo
             `;
 
             // Optional: disable button while starting
@@ -3243,7 +3243,7 @@ stopNemoBtn.addEventListener(
 
                 stopNemoBtn.innerHTML = `
                     <i class="fa-solid fa-circle-exclamation"></i>
-                    Flask Already Down
+                    Already Down
                 `;
 
                 stopNemoBtn.disabled = true;
@@ -3271,7 +3271,7 @@ stopNemoBtn.addEventListener(
 
             stopNemoBtn.innerHTML = `
                 <i class="fa-solid fa-circle-exclamation"></i>
-                Flask Already Down
+                Already Down
             `;
 
             stopNemoBtn.disabled = true;
@@ -3299,7 +3299,7 @@ stopNemoBtn.addEventListener(
 
     stopNemoBtn.innerHTML = `
         <i class="fas fa-spinner fa-spin" style="font-size:19.5px;"></i>
-        Stopping Nemo...
+        Stopping...
     `;
 
     stopNemoBtn.disabled = true;
@@ -3316,7 +3316,7 @@ stopNemoBtn.addEventListener(
 
         stopNemoBtn.innerHTML = `
             <i class="fas fa-cancel" style="font-size:19.5px;"></i>
-            Flask Terminated
+            Terminated !
         `;
 
     }, 1000);
@@ -3415,6 +3415,40 @@ async function checkFlaskStatus(){
 | LIVE PERFORMANCE METRICS
 |--------------------------------------------------------------------------
 */
+function formatNetworkSpeed(kbPerSecond){
+
+    const kb = Number(kbPerSecond) || 0;
+
+    /*
+     * KB/s → Mbps
+     */
+    const mbps =
+        (kb * 1024 * 8) / 1000000;
+
+    /*
+     * Small speed
+     */
+    if(kb < 1024){
+
+        return `${kb.toFixed(kb < 10 ? 1 : 0)} KB/s`;
+    }
+
+    /*
+     * Medium speed
+     */
+    if(mbps < 1){
+
+        const mbPerSecond =
+            kb / 1024;
+
+        return `${mbPerSecond.toFixed(1)} MB/s`;
+    }
+
+    /*
+     * Large speed
+     */
+    return `${mbps.toFixed(mbps < 10 ? 2 : 1)} Mbps`;
+}
 
 async function updatePerformanceMetrics(){
 
@@ -3472,10 +3506,10 @@ async function updatePerformanceMetrics(){
         ).textContent =
             `${data.ram}%`;
 
-        document.getElementById(
-            "internetSpeed"
-        ).textContent =
-            `${data.network} KB/s`;
+       document.getElementById(
+    "internetSpeed"
+).textContent =
+    formatNetworkSpeed(data.network);
 
         /*
         |--------------------------------------------------------------------------

@@ -378,150 +378,7 @@
 
     </div>
 
-<!-- LIVE LOGS -->
-
-<div class="logs-panel glass" id="logsPanel">
-
-    <div
-        style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            margin-bottom:18px;
-        "
-    >
-        <p class="performance-title">
-            Live Server Logs
-        </p>
-
-        <button
-            id="expandLogsBtn"
-            style="
-                width:auto;
-                padding:10px 14px;
-                border-radius:12px;
-                font-size:13px;
-            "
-        >
-            <i class="fa-solid fa-expand"></i>
-        </button>
-    </div>
-
-    <div id="logContainer">
-
-        <div class="waiting-log">
-            Waiting for logs...
-        </div>
-
-    </div>
-
-    <!-- DEV MODE OVERLAY -->
-   <div class="dev-overlay">
-
-    <lottie-player
-        src="https://lottie.host/3756aa18-0154-49c1-996d-f18a2066fc18/VbhDN14UJ9.json"
-        background="transparent"
-        speed="1"
-        style="width:240px;height:240px; margin-bottom:-25px;"
-        loop
-        autoplay>
-    </lottie-player>
-
-    <div class="dev-message">
-
-    <div class="dev-badge">
-        DEV ENVIRONMENT
-    </div>
-
-    
-
-    <div class="subtitle">
-        Live log streaming is available only in Local mode.
-    </div>
-
-</div>
-
-</div>
-
-</div>
-    
-
-</div>
-    
-
-    <!-- MAIN -->
-
-    <div class="main">
-
-        <!-- TOPBAR -->
-
-        <div class="topbar glass">
-
-            <div>
-
-    <h2 class="nemo-title">
-        Meet Neemo — The Image To Form Converter
-    </h2>
-
-    <p class="nemo-subtitle">
-       
-    </p>
-
-</div>
-
-            <button
-                class="copy-btn"
-                id="copyBtn"
-               
-            >
-            <i class="fa-solid fa-copy btn-icon" ></i>
-                Copy Response
-            </button>
-
-        </div>
-
-        <!-- STATS -->
-
-       <!-- NEMO CONTROLS -->
-
-<div class="nemo-controls">
-
-    <button
-        id="startNemoBtn"
-        class="nemo-control-btn nemo-start"
-    >
-
-        <i class="fa-solid fa-play"></i>
-
-        <span id="startNemoText">
-            Start Neemo
-        </span>
-
-    </button>
-
-    <button
-        id="stopNemoBtn"
-        class="nemo-control-btn nemo-stop"
-    >
-
-        <i class="fa-solid fa-power-off"></i>
-
-        Stop Neemo
-
-    </button>
-    <i
-    id="nemoSettingsBtn"
-    class="fa-solid fa-gear nemo-settings"
-    title="Settings"
-></i>
-
-</div>
-
-<div class="nemo-footer">
-    © 2026 Neemo <span id="nemoVersion_footer"></span> • All Rights Reserved
-</div>
-
-        <!-- RESPONSE -->
+<!-- RESPONSE -->
         <!-- LIVE PERFORMANCE PANEL -->
 
 <!-- ====================================== -->
@@ -532,6 +389,9 @@
     class="performance-panel glass"
     id="performancePanel"
 >
+   <div class="vertical-console-title">
+        ENVIRONMENT CONSOLE
+    </div>
 <div class="weather-overlay"></div>
 
     <!-- TOP HEADER -->
@@ -539,7 +399,7 @@
     <div class="performance-header">
 
         <div class="performance-title">
-            Environment Console
+            
         </div>
           <!-- WEATHER MINI WIDGET -->
 
@@ -772,10 +632,154 @@
 </div>
 
     </div>
+     <div class="nemo-footer">
+        © 2026 Neemo <span id="nemoVersion_footer"></span> • All Rights Reserved
+    </div>
 
 </div>
 
-        <div class="response glass">
+
+<!-- STATS -->
+
+       <!-- NEMO CONTROLS -->
+
+<div class="nemo-controls">
+
+    <button
+        id="startNemoBtn"
+        class="nemo-control-btn nemo-start"
+    >
+
+        <i class="fa-solid fa-play"></i>
+
+        <span id="startNemoText">
+            Start Neemo
+        </span>
+
+    </button>
+
+    <button
+        id="stopNemoBtn"
+        class="nemo-control-btn nemo-stop"
+    >
+
+        <i class="fa-solid fa-power-off"></i>
+
+        Stop Neemo
+
+    </button>
+
+</div>
+
+
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main">
+
+<!-- TOPBAR -->
+
+        <div class="topbar glass">
+
+            <div>
+
+    <h2 class="nemo-title">
+        Meet Neemo — The Image To Form Converter
+    </h2>
+
+    <p class="nemo-subtitle">
+       
+    </p>
+
+</div>
+
+            <button
+                class="copy-btn"
+                id="copyBtn"
+               
+            >
+            <i class="fa-solid fa-copy btn-icon" ></i>
+                Copy Response
+            </button>
+                <i
+    id="nemoSettingsBtn"
+    class="fa-solid fa-gear nemo-settings"
+    title="Settings"
+></i>
+
+
+        </div>
+
+<!-- LIVE LOGS -->
+
+<div class="logs-panel glass" id="logsPanel">
+
+    <div
+        style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:18px;
+        "
+    >
+        <p class="performance-title">
+            Live Server Logs
+        </p>
+
+        <button
+            id="expandLogsBtn"
+            style="
+                width:auto;
+                padding:10px 14px;
+                border-radius:12px;
+                font-size:13px;
+            "
+        >
+            <i class="fa-solid fa-expand"></i>
+        </button>
+    </div>
+
+    <div id="logContainer">
+
+        <div class="waiting-log">
+            Waiting for logs...
+        </div>
+
+    </div>
+
+    <!-- DEV MODE OVERLAY -->
+   <div class="dev-overlay">
+
+    <lottie-player
+        src="https://lottie.host/3756aa18-0154-49c1-996d-f18a2066fc18/VbhDN14UJ9.json"
+        background="transparent"
+        speed="1"
+        style="width:240px;height:240px; margin-bottom:-25px;"
+        loop
+        autoplay>
+    </lottie-player>
+
+    <div class="dev-message">
+
+    <div class="dev-badge">
+        DEV ENVIRONMENT
+    </div>
+
+    
+
+    <div class="subtitle">
+        Live log streaming is available only in Local mode.
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="response glass">
            <div class="response-header">
 
     <p class="performance-title">
@@ -828,6 +832,9 @@
     </div>
 
 </div>
+
+</div>
+
 <!-- ====================================== -->
 <!-- LOG VIEWER MODAL -->
 <!-- ====================================== -->
