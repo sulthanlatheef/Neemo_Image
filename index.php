@@ -879,7 +879,16 @@
         
 
     </div>
+  <button
+    id="refreshLogsBtn"
+    class="logs-refresh-btn"
+    title="Refresh Logs"
+    aria-label="Refresh Logs"
+>
+    <i class="fa-solid fa-arrows-rotate"></i>
+</button>
   <div class="modal-actions"> 
+   
    <div class="search-wrapper">
 
     <i

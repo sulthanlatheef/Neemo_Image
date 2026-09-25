@@ -5,7 +5,7 @@ Nemo Client Version
 ===========================================
 */
 
-const NEMO_VERSION = "1.2.2 Beta";
+const NEMO_VERSION = "1.1.2 Beta";
 
 /*
 ===========================================
@@ -21,7 +21,8 @@ const CONTROL_SERVER =
     document.getElementById(
         "expandLogsBtn"
     );
-
+const refreshLogsBtn =
+    document.getElementById("refreshLogsBtn");
 const logsModal =
     document.getElementById(
         "logsModal"
@@ -79,6 +80,28 @@ const selectedImageName =
 
     const framesLoadedEl =
         document.getElementById("framesLoaded");
+    let Neemobtnstatus = false;
+
+   function updateNeemoButtonState() {
+
+    if (!Neemobtnstatus) {
+
+        const shouldDisable = flaskIsRunning;
+
+        startNemoBtn.disabled = shouldDisable;
+
+        startNemoBtn.style.opacity =
+            shouldDisable
+                ? "0.6"
+                : "1";
+
+        startNemoBtn.style.cursor =
+            shouldDisable
+                ? "not-allowed"
+                : "pointer";
+    }
+}
+
 
     const selectedFrameEl =
         document.getElementById("selectedFrame");
@@ -1374,62 +1397,61 @@ function applyDebugHighlight(){
         }
     }
 }
-function openLogsModal(){
-
-    /*
-    |--------------------------------------------------------------------------
-    | CLEAR OLD MODAL DOM
-    |--------------------------------------------------------------------------
-    */
+function refreshLogsModal() {
 
     modalLogContainer.replaceChildren();
 
+    const normalLogs =
+        Array.from(logContainer.children);
 
-    /*
-    |--------------------------------------------------------------------------
-    | COPY CURRENT LOG BUFFER
-    |--------------------------------------------------------------------------
-    */
+    normalLogs.forEach((sourceLine) => {
 
-    const logs =
-        Array.from(
-            logContainer.children
+        const modalLine =
+            sourceLine.cloneNode(true);
+
+        /*
+        |--------------------------------------------------------------------------
+        | SEARCH FILTER
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            logSearchInput.value &&
+            !modalLine.textContent
+                .toLowerCase()
+                .includes(
+                    logSearchInput.value.toLowerCase()
+                )
+        ){
+
+            modalLine.style.display = "none";
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | DEBUG HIGHLIGHT
+        |--------------------------------------------------------------------------
+        */
+
+        if(
+            debugFilterEnabled &&
+            modalLine.textContent
+                .toLowerCase()
+                .includes("neemo")
+        ){
+
+            modalLine.classList.add(
+                "debug-highlight"
+            );
+        }
+
+
+        modalLogContainer.appendChild(
+            modalLine
         );
 
-    logs.forEach(
-        (line)=>{
-
-            const modalLine =
-                line.cloneNode(true);
-
-            modalLogContainer.appendChild(
-                modalLine
-            );
-
-        }
-    );
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | APPLY CURRENT FILTERS
-    |--------------------------------------------------------------------------
-    */
-
-    filterLogs();
-
-    applyDebugHighlight();
-
-
-    /*
-    |--------------------------------------------------------------------------
-    | OPEN MODAL
-    |--------------------------------------------------------------------------
-    */
-
-    logsModal.classList.add(
-        "active"
-    );
+    });
 
 
     /*
@@ -1444,7 +1466,22 @@ function openLogsModal(){
             modalLogContainer.scrollHeight;
 
     }
+}
+function openLogsModal(){
 
+    refreshLogsModal();
+
+    filterLogs();
+    applyDebugHighlight();
+
+    logsModal.classList.add("active");
+
+    if(stickToBottom){
+
+        modalLogContainer.scrollTop =
+            modalLogContainer.scrollHeight;
+
+    }
 }
 function closeLogsViewer(){
 
@@ -1539,12 +1576,15 @@ async function checkNemoStatus(){
 
     }
 
-            startNemoBtn.disabled = true;
+    flaskIsRunning = true;
+    updateNeemoButtonState();
 
-            startNemoBtn.style.opacity = "0.6";
+            // startNemoBtn.disabled = true;
 
-            startNemoBtn.style.cursor =
-                "not-allowed";
+            // startNemoBtn.style.opacity = "0.6";
+
+            // startNemoBtn.style.cursor =
+            //     "not-allowed";
 
              startNemoBtn.innerHTML = `
                 <i class="fas fa-play"></i>
@@ -1624,12 +1664,13 @@ async function checkNemoStatus(){
     | NEMO BUTTON
     |--------------------------------------------------------------------------
     */
+flaskIsRunning = false;
+    updateNeemoButtonState();
+    // startNemoBtn.disabled = false;
 
-    startNemoBtn.disabled = false;
+    // startNemoBtn.style.opacity = "1";
 
-    startNemoBtn.style.opacity = "1";
-
-    startNemoBtn.style.cursor = "pointer";
+    // startNemoBtn.style.cursor = "pointer";
 
     startNemoText.textContent =
         "Start Neemo";
@@ -2047,95 +2088,7 @@ async function fetchLogs(){
         |
         */
 
-        if(
-            logsModal.classList.contains(
-                "active"
-            )
-        ){
-
-            /*
-            |--------------------------------------------------------------------------
-            | REBUILD MODAL FROM CURRENT NORMAL LOG BUFFER
-            |--------------------------------------------------------------------------
-            */
-
-            modalLogContainer.replaceChildren();
-
-            const normalLogs =
-                Array.from(
-                    logContainer.children
-                );
-
-            normalLogs.forEach(
-                (sourceLine)=>{
-
-                    const modalLine =
-                        sourceLine.cloneNode(true);
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | SEARCH FILTER
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if(
-                        logSearchInput.value &&
-                        !modalLine.textContent
-                            .toLowerCase()
-                            .includes(
-                                logSearchInput.value
-                                    .toLowerCase()
-                            )
-                    ){
-
-                        modalLine.style.display =
-                            "none";
-                    }
-
-
-                    /*
-                    |--------------------------------------------------------------------------
-                    | DEBUG HIGHLIGHT
-                    |--------------------------------------------------------------------------
-                    */
-
-                    if(
-                        debugFilterEnabled &&
-                        modalLine.textContent
-                            .toLowerCase()
-                            .includes("neemo")
-                    ){
-
-                        modalLine.classList.add(
-                            "debug-highlight"
-                        );
-
-                    }
-
-
-                    modalLogContainer.appendChild(
-                        modalLine
-                    );
-
-                }
-            );
-
-
-            /*
-            |--------------------------------------------------------------------------
-            | STICK TO BOTTOM
-            |--------------------------------------------------------------------------
-            */
-
-            if(stickToBottom){
-
-                modalLogContainer.scrollTop =
-                    modalLogContainer.scrollHeight;
-
-            }
-
-        }
+      
 
     }catch(error){
 
@@ -2150,7 +2103,10 @@ async function fetchLogs(){
 
     }
 }
-
+refreshLogsBtn.addEventListener(
+    "click",
+    refreshLogsModal
+);
 /*
 |--------------------------------------------------------------------------
 | REFRESH LOGS
@@ -2367,6 +2323,85 @@ const imageSubtitle =
 const imageSuccess =
     document.getElementById("imageSuccess");
 
+// ===========================================
+// IMAGE DELETE BUTTON
+// ===========================================
+
+const removeImageBtn = document.createElement("button");
+
+removeImageBtn.type = "button";
+removeImageBtn.id = "removeImageBtn";
+removeImageBtn.innerHTML =
+    '<i class="fa-solid fa-trash"></i>';
+
+removeImageBtn.title = "Remove image";
+
+removeImageBtn.style.cssText = `
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: 0.2s ease;
+`;
+
+removeImageBtn.addEventListener("mouseenter", () => {
+    removeImageBtn.style.background =
+        "rgba(239, 68, 68, 0.25)";
+    removeImageBtn.style.transform =
+        "scale(1.08)";
+});
+
+removeImageBtn.addEventListener("mouseleave", () => {
+    removeImageBtn.style.background =
+        "rgba(239, 68, 68, 0.15)";
+    removeImageBtn.style.transform =
+        "scale(1)";
+});
+
+// Prevent the card click event from opening the file picker
+removeImageBtn.addEventListener("click", (event) => {
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    // Remove selected file
+    imageFile.value = "";
+
+    // Reset filename
+    selectedImageName.textContent =
+        "No image selected";
+
+    selectedImageName.style.color = "";
+
+    // Reset subtitle
+    imageSubtitle.innerHTML =
+        '<i class="fa-solid fa-image"></i> Select an Image';
+
+    imageSubtitle.style.color = "";
+
+    // Remove selected card state
+    imageCard.classList.remove("selected");
+
+    // Hide trash button
+    removeImageBtn.style.display = "none";
+});
+
+// Make sure the card can position the button correctly
+imageCard.style.position = "relative";
+
+// Add trash button to the image card
+imageCard.appendChild(removeImageBtn);
+
 imageCard.addEventListener("click", (event) => {
 
     event.preventDefault();
@@ -2403,9 +2438,12 @@ imageFile.addEventListener("change", () => {
         }, 3000);
 
         // Clear the invalid file
-        imageFile.value = "";
+      imageFile.value = "";
 
-        return;
+imageCard.classList.remove("selected");
+removeImageBtn.style.display = "none";
+
+return;
     }
 
     const fileName = file.name;
@@ -2426,7 +2464,7 @@ imageFile.addEventListener("change", () => {
     imageCard.classList.add(
         "selected"
     );
-
+removeImageBtn.style.display = "flex";
 });
 [
     "dragenter",
@@ -2609,7 +2647,95 @@ const selectedHtmlName =
 const selectedCssName =
     document.getElementById("selectedCssName");
 
-    
+// ===========================================
+// REMOVE FILE BUTTONS
+// ===========================================
+
+function createRemoveFileButton(card, fileInput, fileNameElement, defaultText) {
+
+    const removeBtn = document.createElement("button");
+
+    removeBtn.type = "button";
+    removeBtn.innerHTML =
+        '<i class="fa-solid fa-trash"></i>';
+
+    // removeBtn.title = "Remove file";
+
+    removeBtn.style.cssText = `
+        position: absolute;
+        top: 22px;
+        right: 60px;
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 40px;
+        background: rgba(239, 68, 68, 0.15);
+        color: #ef4444;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        transition: 0.2s ease;
+    `;
+
+    removeBtn.addEventListener("mouseenter", () => {
+        removeBtn.style.background =
+            "rgba(239, 68, 68, 0.25)";
+
+        removeBtn.style.transform =
+            "scale(1.08)";
+    });
+
+    removeBtn.addEventListener("mouseleave", () => {
+        removeBtn.style.background =
+            "rgba(239, 68, 68, 0.15)";
+
+        removeBtn.style.transform =
+            "scale(1)";
+    });
+
+    removeBtn.addEventListener("click", (event) => {
+
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Clear selected file
+        fileInput.value = "";
+
+        // Reset filename
+        fileNameElement.textContent =
+            defaultText;
+
+        fileNameElement.style.color = "";
+
+        // Remove selected styling
+        card.classList.remove("selected");
+
+        // Hide trash icon
+        removeBtn.style.display = "none";
+    });
+
+    card.style.position = "relative";
+    card.appendChild(removeBtn);
+
+    return removeBtn;
+}
+    const removeHtmlBtn =
+    createRemoveFileButton(
+        htmlCard,
+        htmlFile,
+        selectedHtmlName,
+        "No file selected"
+    );
+
+const removeCssBtn =
+    createRemoveFileButton(
+        cssCard,
+        cssFile,
+        selectedCssName,
+        "No file selected"
+    );
 htmlCard.addEventListener("click",()=>{
 
     htmlFile.click();
@@ -2683,13 +2809,12 @@ htmlFile.addEventListener("change", () => {
             selectedHtmlName
         );
 
-        htmlFile.value = "";
+       htmlFile.value = "";
 
-        htmlCard.classList.remove(
-            "selected"
-        );
+htmlCard.classList.remove("selected");
+removeHtmlBtn.style.display = "none";
 
-        return;
+return;
 
     }
 
@@ -2704,7 +2829,7 @@ htmlFile.addEventListener("change", () => {
     htmlCard.classList.add(
         "selected"
     );
-
+removeHtmlBtn.style.display = "flex";
 });
 
 
@@ -2724,13 +2849,12 @@ cssFile.addEventListener("change", () => {
             selectedCssName
         );
 
-        cssFile.value = "";
+       cssFile.value = "";
 
-        cssCard.classList.remove(
-            "selected"
-        );
+cssCard.classList.remove("selected");
+removeCssBtn.style.display = "none";
 
-        return;
+return;
 
     }
 
@@ -2745,6 +2869,7 @@ cssFile.addEventListener("change", () => {
     cssCard.classList.add(
         "selected"
     );
+    removeCssBtn.style.display = "flex";
 
 });
 
@@ -3158,9 +3283,13 @@ startNemoBtn.addEventListener(
 
         try{
             
-
+           Neemobtnstatus = true;
             // Store original button content
             const originalHTML = startNemoBtn.innerHTML;
+            startNemoBtn.disabled = true;
+            startNemoBtn.style.opacity = "0.6";
+            startNemoBtn.style.cursor="not-allowed";
+            
 
             // Show loading state
             startNemoBtn.innerHTML = `
@@ -3181,15 +3310,19 @@ startNemoBtn.addEventListener(
             
 
             setTimeout(()=>{
+                Neemobtnstatus = false;
 
-                checkNemoStatus();
+                //checkNemoStatus();
+                
 
 
 
-            }, 5000);
+            }, 10000);
 
 
         }catch(error){
+
+             Neemobtnstatus = false;
 
             console.error(error);
 

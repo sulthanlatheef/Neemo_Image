@@ -7508,6 +7508,65 @@ IMAGE DROP CARD
     }
 
 }
+@media (min-height:980px) and (max-height:990px){
+
+    /* Upload Cards */
+    .upload-card{
+        gap:16px;
+        padding:28.5px;
+        margin-top:28px;
+        border-radius:16px;
+    }
+
+    .upload-icon{
+        width:50px;
+        height:50px;
+        border-radius:14px;
+        font-size:22px;
+    }
+
+    .upload-title{
+        font-size:15px;
+    }
+
+    .upload-name{
+        margin-top:5px;
+        font-size:13px;
+    }
+
+    .upload-check{
+        font-size:24px;
+    }
+
+    /* Image Drop Card */
+    .upload-drop-card{
+        margin-top:15px;
+        padding:14px 22px;
+        border-radius:20px;
+    }
+
+    .upload-drop-icon{
+        font-size:34px;
+    }
+
+    .upload-drop-title{
+        margin-top:10px;
+        font-size:15.5px;
+    }
+
+    .upload-drop-subtitle{
+        margin-top:8px;
+        font-size:13.5px;
+        line-height:20px;
+    }
+
+    .upload-success{
+        margin-top:14px;
+
+        font-size:14px;
+    }
+
+}
 /* =========================================================
    NEMO SETTINGS ICON
 ========================================================= */
@@ -9440,4 +9499,68 @@ font-family: "JetBrains Mono", monospace;
 /* Keep settings out of this control bar if still present */
 .dev-console > .nemo-controls .nemo-settings{
     display:none !important;
+}
+.logs-refresh-btn{
+    width:50px;
+    height:50px;
+    padding:5px;
+    margin-left:400px;
+    flex-shrink:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:25px;
+
+    background:
+        rgba(255,255,255,0.05);
+
+    border:
+        1px solid rgba(255,255,255,0.08);
+
+    color:#00f5ff;
+
+    font-size:19px;
+
+    cursor:pointer;
+
+    backdrop-filter:blur(12px);
+
+    transition:
+        transform 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+}
+
+.logs-refresh-btn:hover{
+
+    transform:
+        translateY(-1px);
+
+    background:
+        rgba(0,245,255,0.08);
+
+    border-color:
+        rgba(0,245,255,0.35);
+
+    box-shadow:
+        0 0 18px rgba(0,245,255,0.15);
+}
+
+.logs-refresh-btn:active{
+
+    transform:
+        scale(0.94);
+}
+
+.logs-refresh-btn i{
+    transition:
+        transform 0.5s ease;
+}
+
+.logs-refresh-btn:hover i{
+    transform:
+        rotate(180deg);
 }
