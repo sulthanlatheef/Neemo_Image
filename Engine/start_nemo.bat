@@ -7,9 +7,8 @@ for /f "usebackq tokens=1,* delims==" %%A in ("..\.env") do (
     set "%%A=%%B"
 )
 
-echo PYTHON_PATH=%PYTHON_PATH%
+@REM  echo PYTHON_PATH=%PYTHON_PATH%
 
 
 "%PYTHON_PATH%" neemo_engine.py
 
-pause

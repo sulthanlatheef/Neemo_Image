@@ -1,10 +1,10 @@
 <?php
 
-require_once __DIR__ . "/vendor/autoload.php";
+// require_once __DIR__ . "/vendor/autoload.php";
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+// $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 
-$dotenv->load();
+// $dotenv->load();
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
@@ -13,9 +13,11 @@ header("Content-Type: application/json");
 
 $action = $_GET['action'] ?? '';
 
-$fastapiBaseUrl = "http://127.0.0.1:5000/figmaimport";
+$fastapiBaseUrl = "http://host.docker.internal:5000/figmaimport";
 
-$devControllerBaseUrl = "http://127.0.0.1:3001";
+$devControllerBaseUrl = "http://host.docker.internal:3001";
+
+$neemoControllerBaseUrl = "http://host.docker.internal:5002";
 
 /*
 |--------------------------------------------------------------------------
@@ -177,43 +179,35 @@ if ($action === 'get_status') {
 
 /*
 |--------------------------------------------------------------------------
-| START NEMO CONTROLLER
+| START NEMO
 |--------------------------------------------------------------------------
 */
 
 if ($action === 'start_nemo') {
 
-    try {
-
-        $batFile = $_ENV["NEMO_BAT_FILE"];
-
-        $process = popen(
-            'cmd /c start "" "' . $batFile . '"',
-            'r'
-        );
-
-        if ($process === false) {
-            throw new Exception("Failed to start Nemo.");
-        }
-
-        pclose($process);
-
-        echo json_encode([
-            "status" => "started"
-        ]);
-
-    } catch (Exception $e) {
-
-        http_response_code(500);
-
-        echo json_encode([
-            "status" => "error",
-            "message" => $e->getMessage()
-        ]);
-    }
+    echo sendGetRequest(
+        $neemoControllerBaseUrl . "/start"
+    );
 
     exit;
 }
+
+/*
+|--------------------------------------------------------------------------
+| STOP NEMO
+|--------------------------------------------------------------------------
+*/
+
+if ($action === 'stop_nemo') {
+
+    echo sendGetRequest(
+        $neemoControllerBaseUrl . "/stop"
+    );
+
+    exit;
+}
+
+
 function postJsonRequest($url, $payload)
 {
     $ch = curl_init();
@@ -254,7 +248,7 @@ function postJsonRequest($url, $payload)
 if ($action === 'health') {
 
     echo sendGetRequest(
-        "http://127.0.0.1:8000/health"
+        "http://host.docker.internal:8000/health"
     );
 
     exit;
@@ -268,7 +262,7 @@ if ($action === 'health') {
 if ($action === "upload_image") {
 
     echo postMultipartRequest(
-        "http://127.0.0.1:3001/upload_image"
+        "http://host.docker.internal:3001/upload_image"
     );
 
     exit;
@@ -284,7 +278,7 @@ if ($action === "upload_html_css") {
 
     echo postMultipartRequest(
 
-        "http://127.0.0.1:3001/upload_html_css"
+        "http://host.docker.internal:3001/upload_html_css"
 
     );
 
@@ -296,7 +290,7 @@ if($action === "update_nemo"){
 
     $response = file_get_contents(
 
-        "http://127.0.0.1:3001/update-client",
+        "http://host.docker.internal:3001/update-client",
 
         false,
 
