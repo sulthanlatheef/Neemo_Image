@@ -419,11 +419,18 @@ def upload_image_endpoint():
 
         with request_count_lock:
             total_requests += 1
-
-        return jsonify(result.get("result", {}))
+        print(result)
+        if result.get("result"):
+            return jsonify(result.get("result", {}))
+        else:
+            return jsonify({
+                "status": "error",
+                "message": result.get("message", "Unknown error occurred.").get("message", "Unknown error occurred.")
+            }), 500
+        
         
 
-    except requests.HTTPError as e:
+    except Exception as e:
 
         if e.response is not None:
             try:
@@ -436,7 +443,7 @@ def upload_image_endpoint():
 
             except Exception:
                 pass
-
+        print(f"HTTPError: {str(e)}")
         return jsonify({
         "status": "error",
         "message": str(e)

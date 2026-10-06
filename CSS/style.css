@@ -1150,13 +1150,13 @@ button{
 
     position:absolute;
 
-    right:-20px;
+    right:-25px;
 
-    top:5px;
+    top:35px;
 
-    width:185px;
+    width:195px;
 
-    height:185px;
+    height:195px;
 
     pointer-events:none;
 }
@@ -5529,12 +5529,12 @@ body {
 @media (max-height: 940px){
 
     .dashboard{
-        gap:20px;
-        padding:14px;
+        gap:15px;
+        padding:10px;
     }
 
     .panel{
-        padding:18px;
+        padding:15px;
     }
 
     .logo-box{

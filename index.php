@@ -53,9 +53,9 @@
 
         <div class="logo-box glass" style="padding:20px;">
 
-            <h1 style="font-size:31px;">IMAGE</h1>
+            <h1 style="font-size:29px;">Image To Forms</h1>
 
-            <p style="font-size:14px;">API DASHBOARD</p>
+            <!-- <p style="font-size:14px;">API DASHBOARD</p> -->
 
       <!-- SERVER STATUS -->
 
@@ -86,6 +86,22 @@
         Checking Server...
 
     </div>
+    <!-- CONTROLLER STATUS -->
+
+<div
+    class="status"
+    id="controllerStatus"
+    style="
+        font-size:14px;
+        margin-top:0;
+        width:190px;
+        justify-content:center;
+    "
+>
+    <div class="status-dot"></div>
+    Checking Controller...
+</div>
+    
 
     <!-- FLASK STATUS -->
 
@@ -275,10 +291,10 @@
 
         </div>
 
-        <i
+        <!-- <i
             class="fa-solid fa-circle-check upload-check"
             id="htmlCheck"
-        ></i>
+        ></i> -->
 
     </div>
 
@@ -314,10 +330,10 @@
 
         </div>
 
-        <i
+        <!-- <i
             class="fa-solid fa-circle-check upload-check"
             id="cssCheck"
-        ></i>
+        ></i> -->
 
     </div>
 

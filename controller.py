@@ -86,7 +86,13 @@ def stop_nemo():
             "message": str(e)
         }), 500
 
+@app.route('/health', methods=['GET'])
 
+def status():
+
+    return jsonify({
+        "status": "ok"
+    })
 # ------------------------------------------------------------------
 # RUN CONTROLLER
 # ------------------------------------------------------------------

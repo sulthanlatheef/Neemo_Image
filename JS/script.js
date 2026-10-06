@@ -2274,11 +2274,53 @@ async function checkServerStatus(){
 }
 
 checkServerStatus();
+async function checkControllerStatus() {
 
-setInterval(
-    checkServerStatus,
-    5000
-);
+    const controllerStatus =
+        document.getElementById("controllerStatus");
+
+    try {
+
+        const res = await fetch(
+            "api.php?action=controller"
+        );
+
+        const data = await res.json();
+
+        if (data.status === "ok") {
+
+            controllerStatus.classList.remove(
+                "status-offline"
+            );
+
+            controllerStatus.innerHTML = `
+                <div class="status-dot"></div>
+                Controller Active
+            `;
+
+        } else {
+
+            throw new Error();
+
+        }
+
+    } catch (error) {
+
+        controllerStatus.classList.add(
+            "status-offline"
+        );
+
+        controllerStatus.innerHTML = `
+            <div class="status-dot offline"></div>
+            Controller Down
+        `;
+    }
+}
+
+setInterval(() => {
+    checkServerStatus();
+    checkControllerStatus();
+}, 5000);
 async function updateStartServerButton() {
 
     try {
@@ -2611,21 +2653,79 @@ displayResponse(
     }
 
     catch(error){
-   imageUploadRunning = false;
 
-updateUploadImageButtonState();
+    imageUploadRunning = false;
 
-        stopResponseTimer();
+    updateUploadImageButtonState();
 
-        responseBox.style.color="#ef4444";
+    stopResponseTimer();
 
-        responseBox.textContent=
+    responseBox.style.color = "#ef4444";
 
-"Unexpected error while uploading image. Please ensure VPN is connected and server is running!";
+    responseBox.innerHTML = `
+        Unexpected error while uploading image.Please ensure VPN is connected and server is running!<span
+            id="uploadErrorInfo"
+            title="Show error details"
+            style="
+                display:inline-flex;
+                align-items:center;
+                justify-content:center;
+                width:23px;
+                height:23px;
+                margin-left:9px;
 
-        console.error(error);
+                background:#ef4444;
+                color:#ffffff;
 
-    }
+                border-radius:50%;
+
+                font-size:14.5px;
+                font-weight:900;
+                font-family:Arial, sans-serif;
+
+                cursor:pointer;
+                user-select:none;
+                vertical-align:middle;
+
+                transition:
+                    background-color 0.2s ease,
+                    transform 0.2s ease,
+                    box-shadow 0.2s ease;
+            "
+        >i</span>
+    `;
+
+    const infoButton =
+        document.getElementById("uploadErrorInfo");
+
+    infoButton.addEventListener("mouseenter", () => {
+
+        infoButton.style.backgroundColor = "#dc2626";
+        infoButton.style.transform = "scale(1.12)";
+        infoButton.style.boxShadow =
+            "0 0 8px rgba(239, 68, 68, 0.45)";
+
+    });
+
+    infoButton.addEventListener("mouseleave", () => {
+
+        infoButton.style.backgroundColor = "#ef4444";
+        infoButton.style.transform = "scale(1)";
+        infoButton.style.boxShadow = "none";
+
+    });
+
+    infoButton.addEventListener("click", () => {
+
+        responseBox.textContent =
+            error.message || "Unknown error";
+
+        responseBox.style.color = "#ef4444";
+
+    });
+
+    console.error(error);
+}
 
 });
 
@@ -2663,8 +2763,8 @@ function createRemoveFileButton(card, fileInput, fileNameElement, defaultText) {
 
     removeBtn.style.cssText = `
         position: absolute;
-        top: 22px;
-        right: 60px;
+        top: 15px;
+        right: 15px;
         width: 34px;
         height: 34px;
         border: none;
