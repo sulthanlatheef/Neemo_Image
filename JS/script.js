@@ -5,7 +5,7 @@ Nemo Client Version
 ===========================================
 */
 
-const NEMO_VERSION = "1.3.2 Beta";
+const NEMO_VERSION = "1.3.4 Beta";
 
 /*
 ===========================================
